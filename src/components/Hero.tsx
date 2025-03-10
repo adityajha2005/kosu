@@ -133,7 +133,7 @@ export default function Hero() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-slate-900 text-gray-100">
       <Head>
-        <title>HackLaunch | AI-Powered Hackathon Platform</title>
+        <title>KOSU | AI-Powered Hackathon Platform</title>
         <meta name="description" content="Seamless hackathon organization platform with AI automation and blockchain rewards" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -523,7 +523,7 @@ export default function Hero() {
             >
               <h2 className="text-3xl font-bold mb-4 text-white">For Every Stakeholder</h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                HackLaunch creates value for everyone involved in the hackathon ecosystem, from organizers to participants.
+                KOSU creates value for everyone involved in the hackathon ecosystem, from organizers to participants.
               </p>
             </motion.div>
 
@@ -822,7 +822,7 @@ export default function Hero() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
               >
-                Join thousands of organizers, participants, and sponsors who are already using HackLaunch to create impactful tech events and discover opportunities.
+                Join thousands of organizers, participants, and sponsors who are already using KOSU to create impactful tech events and discover opportunities.
               </motion.p>
               <motion.div
                 className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -860,7 +860,7 @@ export default function Hero() {
                   <span className="text-white font-bold text-xl">HL</span>
                 </div>
                 <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 inline-block text-transparent bg-clip-text">
-                  HackLaunch
+                  KOSU
                 </h2>
               </div>
               <p className="text-gray-400 mb-4">
@@ -917,7 +917,7 @@ export default function Hero() {
           </div>
           
           <div className="border-t border-gray-800 mt-10 pt-8 flex flex-col md:flex-row justify-between">
-            <p className="text-gray-500 text-sm">© 2025 HackLaunch. All rights reserved.</p>
+            <p className="text-gray-500 text-sm">© 2025 KOSU. All rights reserved.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-500 hover:text-blue-400 text-sm">Terms of Service</a>
               <a href="#" className="text-gray-500 hover:text-blue-400 text-sm">Privacy Policy</a>
