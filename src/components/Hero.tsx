@@ -1,31 +1,44 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-
   ChevronRight,
   CheckCircle,
-
   Menu,
   X,
   Calendar,
   Users,
   Award,
   Code,
-
   Briefcase,
   Gift,
-
   FileCode,
   Database
 } from 'lucide-react';
 
+
+type AnimationState = {
+  "features-section": boolean;
+  "feature-demo-section": boolean;
+  "user-tabs-section": boolean;
+  "active-hackathons": boolean;
+};
+
+
+
 export default function Hero() {
   const [activeTab, setActiveTab] = useState('candidates');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [animationTriggered, setAnimationTriggered] = useState({});
+ 
+  const [animationTriggered, setAnimationTriggered] = useState<AnimationState>({
+    "features-section": false,
+    "feature-demo-section": false,
+    "user-tabs-section": false,
+    "active-hackathons": false
+  });
   const [activeDemoFeature, setActiveDemoFeature] = useState('eventSetup');
 
   // Handle scroll animations
@@ -116,6 +129,7 @@ export default function Hero() {
       image: "/api/placeholder/400/320"
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-slate-900 text-gray-100">
