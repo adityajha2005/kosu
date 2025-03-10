@@ -39,7 +39,7 @@ export default function Hero() {
     "user-tabs-section": false,
     "active-hackathons": false
   });
-  const [activeDemoFeature, setActiveDemoFeature] = useState('eventSetup');
+  const [activeDemoFeature, setActiveDemoFeature] = useState<FeatureKey >('eventSetup');
 
   // Handle scroll animations
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function Hero() {
       image: "/api/placeholder/400/320"
     }
   };
-  
+  type FeatureKey = keyof typeof demoFeatures;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-slate-900 text-gray-100">
@@ -582,7 +582,7 @@ export default function Hero() {
                       {feature === 'problemStatements' && <Database size={20} className="text-yellow-400" />}
                       {feature === 'codeEvaluation' && <Code size={20} className="text-red-400" />}
                       {feature === 'smartHiring' && <Briefcase size={20} className="text-blue-400" />}
-                      <span>{demoFeatures[feature].title}</span>
+                      <span>{demoFeatures[feature as FeatureKey].title}</span>
                     </motion.li>
                   ))}
                 </ul>
@@ -597,7 +597,7 @@ export default function Hero() {
                   transition={{ duration: 0.5 }}
                 >
                   <div className="mb-4">
-                    <h3 className="text-xl font-bold text-white mb-2">{demoFeatures[activeDemoFeature].title}</h3>
+                    <h3 className="text-xl font-bold text-white mb-2">{demoFeatures[activeDemoFeature ].title}</h3>
                     <p className="text-blue-200">{demoFeatures[activeDemoFeature].description}</p>
                   </div>
                   
