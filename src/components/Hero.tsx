@@ -16,7 +16,8 @@ import {
   FileCode,
   Database
 } from 'lucide-react';
-import Header from './Header';
+import Image from 'next/image';
+
 
 
 type AnimationState = {
@@ -500,10 +501,12 @@ export default function Hero() {
                   </div>
                   
                   <div className="mt-6 bg-gray-900/50 rounded-xl overflow-hidden border border-gray-700/50">
-                    <img 
+                    <Image
                       src={demoFeatures[activeDemoFeature].image} 
                       alt={demoFeatures[activeDemoFeature].title}
                       className="w-full h-auto"
+                      width={1000}
+                      height={500}
                     />
                   </div>
                 </motion.div>
@@ -599,7 +602,8 @@ export default function Hero() {
                     </ul>
                   </div>
                   <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-                    <img src="/organizer.png" alt="Organizer Dashboard" className="w-full h-auto" />
+                    <Image src="/organizer.png" alt="Organizer Dashboard" className="w-full h-auto" width={1000}
+                      height={500} />
                   </div>
                 </motion.div>
               )}
@@ -646,7 +650,8 @@ export default function Hero() {
                     </ul>
                   </div>
                   <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-                    <img src="/candidate.png" alt="Candidate Profile" className="w-full h-auto" />
+                    <Image src="/candidate.png" alt="Candidate Profile" className="w-full h-auto" width={1000}
+                      height={500}/>
                   </div>
                 </motion.div>
               )}
@@ -693,7 +698,8 @@ export default function Hero() {
                     </ul>
                   </div>
                   <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-                    <img src="/sponsor.png" alt="Sponsor Dashboard" className="w-full h-auto" />
+                    <Image src="/sponsor.png" alt="Sponsor Dashboard" className="w-full h-auto" width={1000}
+                      height={500}/>
                   </div>
                 </motion.div>
               )}
