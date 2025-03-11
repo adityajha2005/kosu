@@ -311,10 +311,9 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
               </button>
             </div>
             <div className="lg:w-1/2 bg-gray-900 rounded-xl overflow-hidden border border-gray-700 shadow-xl">
-              {/* In a real application, this would be an actual image or interactive demo */}
               <div className="aspect-w-16 aspect-h-9 bg-gray-900 flex items-center justify-center p-8">
                 <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center">
-                  <img src="/visualization.png"></img>
+                  <img src="/visualization.png" alt="Visualization" className="w-full h-full object-cover rounded-lg" />
                 </div>
               </div>
             </div>

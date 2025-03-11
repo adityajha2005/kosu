@@ -116,7 +116,7 @@ export default function Dashboard() {
                     92% Match
                   </span>
                 </div>
-                <p className="text-gray-400 text-sm mt-2">Based on your AI assessment, you're an excellent match for this position.</p>
+                <p className="text-gray-400 text-sm mt-2">Based on your AI assessment, you&apos;re an excellent match for this position.</p>
               </div>
               
               <div className="border border-gray-700 rounded-lg p-4 hover:bg-gray-700/50 transition-colors cursor-pointer">
