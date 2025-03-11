@@ -1,0 +1,59 @@
+JOHN DOE
+Software Developer
+john.doe@example.com | (555) 123-4567 | linkedin.com/in/johndoe | github.com/johndoe
+
+SUMMARY
+Experienced software developer with 5+ years of experience in full-stack development, specializing in JavaScript, React, and Node.js. Passionate about creating efficient, scalable, and user-friendly applications.
+
+SKILLS
+Programming Languages: JavaScript, TypeScript, Python, Java
+Frontend: React, Redux, HTML5, CSS3, SASS, Tailwind CSS
+Backend: Node.js, Express, Django, Spring Boot
+Databases: MongoDB, PostgreSQL, MySQL
+Tools: Git, Docker, AWS, Azure, CI/CD, Jest, Webpack
+
+EXPERIENCE
+Senior Software Developer
+ABC Tech | Remote | January 2021 - Present
+- Developed and maintained multiple React-based web applications, improving performance by 40%
+- Implemented CI/CD pipelines using GitHub Actions, reducing deployment time by 60%
+- Led a team of 5 developers in building a new e-commerce platform with 100,000+ monthly users
+- Optimized database queries, resulting in a 30% reduction in API response times
+
+Software Developer
+XYZ Solutions | San Francisco, CA | June 2018 - December 2020
+- Built RESTful APIs using Node.js and Express, serving data to React frontend applications
+- Collaborated with UX designers to implement responsive designs using Tailwind CSS
+- Refactored legacy code, improving maintainability and reducing bugs by 25%
+- Participated in code reviews and mentored junior developers
+
+Junior Developer
+Tech Startup | Boston, MA | August 2016 - May 2018
+- Assisted in developing a customer-facing web application using React and Redux
+- Created and maintained documentation for API endpoints and database schemas
+- Fixed bugs and implemented new features based on customer feedback
+- Participated in daily stand-ups and sprint planning meetings
+
+EDUCATION
+Bachelor of Science in Computer Science
+University of Technology | 2012 - 2016
+- GPA: 3.8/4.0
+- Relevant coursework: Data Structures, Algorithms, Database Systems, Web Development
+
+PROJECTS
+Personal Portfolio Website (github.com/johndoe/portfolio)
+- Designed and developed a personal portfolio website using React and Tailwind CSS
+- Implemented responsive design and dark mode toggle
+
+E-commerce Platform (github.com/johndoe/shop-app)
+- Built a full-stack e-commerce application using MERN stack (MongoDB, Express, React, Node.js)
+- Implemented user authentication, product catalog, shopping cart, and payment processing
+
+Weather App (github.com/johndoe/weather-app)
+- Created a weather application using React that fetches data from OpenWeatherMap API
+- Implemented geolocation to automatically detect user's location
+
+CERTIFICATIONS
+- AWS Certified Developer - Associate
+- MongoDB Certified Developer
+- React Developer Certification 

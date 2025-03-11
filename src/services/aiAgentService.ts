@@ -495,10 +495,36 @@ const extractSkillsFromResume = (resumeText: string): string[] => {
     // Check if the skill appears as a whole word in the text
     // Escape special regex characters in the skill name
     const escapedSkill = normalizedSkill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
     
-    if (regex.test(normalizedText)) {
-      foundSkills.add(skill);
+    // For short skills (<=4 chars), use stricter matching to avoid false positives
+    // For example, "Move" should not match "movement" or "remove"
+    if (normalizedSkill.length <= 4) {
+      // For short skills, require word boundaries on both sides to ensure it's a standalone word
+      const regex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
+      
+      // For technical skills like "AI", also check for common contexts
+      if (skill === "AI") {
+        const aiContextRegex = new RegExp(`\\b(${escapedSkill}|artificial intelligence|machine learning|neural network|deep learning)\\b`, 'i');
+        if (aiContextRegex.test(normalizedText)) {
+          foundSkills.add(skill);
+        }
+      } 
+      // For blockchain skills like "Move", check for blockchain context
+      else if (skill === "Move" || skill === "Aptos") {
+        const blockchainContextRegex = new RegExp(`\\b(${escapedSkill}.*?(blockchain|crypto|web3|smart contract|programming language))\\b|\\b((blockchain|crypto|web3|smart contract|programming language).*?${escapedSkill})\\b`, 'i');
+        if (blockchainContextRegex.test(normalizedText)) {
+          foundSkills.add(skill);
+        }
+      }
+      else if (regex.test(normalizedText)) {
+        foundSkills.add(skill);
+      }
+    } else {
+      // For longer skills, use the original regex
+      const regex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
+      if (regex.test(normalizedText)) {
+        foundSkills.add(skill);
+      }
     }
   });
   
@@ -556,64 +582,108 @@ const generateJobMatches = (skills: string[], modelData: any): JobMatch[] => {
       title: 'Blockchain Developer',
       company: 'Aptos Labs',
       location: 'Remote',
-      requiredSkills: ['Blockchain', 'Smart Contracts', 'Aptos', 'Move']
+      requiredSkills: ['Blockchain', 'Smart Contracts', 'Aptos', 'Move'],
+      // Categorize skills to ensure critical skills are matched
+      criticalSkills: ['Aptos', 'Move'],
+      importantSkills: ['Blockchain', 'Smart Contracts']
     },
     {
       title: 'AI Integration Specialist',
       company: 'MOVE AI',
       location: 'San Francisco',
-      requiredSkills: ['Machine Learning', 'AI', 'API Integration', 'Python']
+      requiredSkills: ['Machine Learning', 'AI', 'API Integration', 'Python'],
+      criticalSkills: ['Machine Learning', 'AI'],
+      importantSkills: ['Python', 'API Integration']
     },
     {
       title: 'Full Stack Developer',
       company: 'Decentralized Finance',
       location: 'New York',
-      requiredSkills: ['JavaScript', 'React', 'Node.js', 'Blockchain']
+      requiredSkills: ['JavaScript', 'React', 'Node.js', 'Blockchain'],
+      criticalSkills: ['JavaScript'],
+      importantSkills: ['React', 'Node.js', 'Blockchain']
     },
     {
       title: 'Web3 Product Manager',
       company: 'Decentralized Systems',
       location: 'Singapore',
-      requiredSkills: ['Product Management', 'Web3', 'Blockchain', 'Leadership']
+      requiredSkills: ['Product Management', 'Web3', 'Blockchain', 'Leadership'],
+      criticalSkills: ['Product Management', 'Web3'],
+      importantSkills: ['Blockchain', 'Leadership']
     },
     {
       title: 'Frontend Developer',
       company: 'Web3 Startup',
       location: 'Berlin',
-      requiredSkills: ['JavaScript', 'React', 'TypeScript', 'CSS']
+      requiredSkills: ['JavaScript', 'React', 'TypeScript', 'CSS'],
+      criticalSkills: ['JavaScript', 'React'],
+      importantSkills: ['TypeScript', 'CSS']
     }
   ];
   
   // Calculate match percentage for each job
   return jobTemplates.map((job, index) => {
-    // Improved skill matching with more flexible comparison
-    const matchingSkills = job.requiredSkills.filter(requiredSkill => 
-      skills.some(candidateSkill => {
-        // Convert both to lowercase for case-insensitive comparison
-        const reqSkill = requiredSkill.toLowerCase();
-        const candSkill = candidateSkill.toLowerCase();
-        
-        // Normalize skills by removing special characters for safer comparison
-        const normalizeSkill = (skill: string) => skill.replace(/[.*+?^${}()|[\]\\]/g, '');
-        const normalizedReqSkill = normalizeSkill(reqSkill);
-        const normalizedCandSkill = normalizeSkill(candSkill);
-        
-        // Check for exact match or if candidate skill contains the required skill
-        return reqSkill === candSkill || 
-               candSkill.includes(reqSkill) || 
-               reqSkill.includes(candSkill) ||
-               normalizedCandSkill.includes(normalizedReqSkill) || 
-               normalizedReqSkill.includes(normalizedCandSkill);
-      })
+    // Find exact matching skills (case insensitive)
+    const exactMatchingSkills = job.requiredSkills.filter(requiredSkill => 
+      skills.some(candidateSkill => 
+        candidateSkill.toLowerCase() === requiredSkill.toLowerCase()
+      )
     );
     
-    // Calculate raw match percentage
-    const matchPercentage = Math.round((matchingSkills.length / job.requiredSkills.length) * 100);
+    // Calculate weighted match percentage
+    let matchScore = 0;
+    let totalPossibleScore = 0;
+    
+    // Check critical skills - these are weighted more heavily
+    const criticalSkillsMatched = job.criticalSkills.filter(criticalSkill => 
+      exactMatchingSkills.some(match => match.toLowerCase() === criticalSkill.toLowerCase())
+    );
+    
+    // Critical skills are worth 60% of the total score (30% each for a job with 2 critical skills)
+    const criticalSkillWeight = 60 / job.criticalSkills.length;
+    matchScore += criticalSkillsMatched.length * criticalSkillWeight;
+    totalPossibleScore += 60;
+    
+    // Check important skills - these are weighted less
+    const importantSkillsMatched = job.importantSkills.filter(importantSkill => 
+      exactMatchingSkills.some(match => match.toLowerCase() === importantSkill.toLowerCase())
+    );
+    
+    // Important skills are worth 40% of the total score (10% each for a job with 4 important skills)
+    const importantSkillWeight = 40 / job.importantSkills.length;
+    matchScore += importantSkillsMatched.length * importantSkillWeight;
+    totalPossibleScore += 40;
+    
+    // Calculate final percentage
+    const matchPercentage = Math.round((matchScore / totalPossibleScore) * 100);
+    
+    // Special case for Aptos and Move - if these are critical skills and not matched, cap the percentage
+    if (job.criticalSkills.includes('Aptos') || job.criticalSkills.includes('Move')) {
+      const hasAptosOrMove = exactMatchingSkills.some(skill => 
+        skill === 'Aptos' || skill === 'Move'
+      );
+      
+      // If Aptos or Move are critical but not found, cap the match at 60%
+      if (!hasAptosOrMove) {
+        const cappedPercentage = Math.min(matchPercentage, 60);
+        
+        return {
+          id: (index + 1).toString(),
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          matchPercentage: cappedPercentage,
+          description: `This position requires specific blockchain skills (Aptos, Move) that weren't found in your resume.`,
+          skills: job.requiredSkills,
+          datePosted: `${Math.floor(Math.random() * 14) + 1} days ago`
+        };
+      }
+    }
     
     // Create description based on matching skills
     let description = '';
-    if (matchingSkills.length > 0) {
-      description = `Your skills in ${matchingSkills.join(', ')} align with this position.`;
+    if (exactMatchingSkills.length > 0) {
+      description = `Your skills in ${exactMatchingSkills.join(', ')} align with this position.`;
     } else {
       description = 'This position requires skills that weren\'t found in your resume.';
     }
@@ -623,7 +693,7 @@ const generateJobMatches = (skills: string[], modelData: any): JobMatch[] => {
       title: job.title,
       company: job.company,
       location: job.location,
-      matchPercentage: matchPercentage, // Use actual match percentage without artificial constraints
+      matchPercentage: matchPercentage,
       description: description,
       skills: job.requiredSkills,
       datePosted: `${Math.floor(Math.random() * 14) + 1} days ago`

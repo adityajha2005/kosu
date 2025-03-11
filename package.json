@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "framer-motion": "^12.4.11",
+    "fs": "^0.0.1-security",
     "lucide-react": "^0.479.0",
     "next": "15.2.1",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^4.10.38",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "web3": "^4.16.0"

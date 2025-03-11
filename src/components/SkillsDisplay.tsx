@@ -27,19 +27,28 @@ export default function SkillsDisplay({ skills, onSkillToggle }: SkillsDisplayPr
   
   // Group skills by category (in a real app, this would be more sophisticated)
   const skillCategories = {
-    'Blockchain': ['Blockchain', 'Smart Contracts', 'Aptos', 'Move', 'Solidity', 'Web3'],
-    'Programming': ['JavaScript', 'Python', 'React', 'TypeScript', 'Node.js'],
-    'AI/ML': ['Machine Learning', 'AI', 'TensorFlow', 'PyTorch', 'API Integration'],
-    'Other': ['Product Management', 'Leadership', 'Communication']
+    'Blockchain': ['Blockchain', 'Smart Contracts', 'Solidity', 'Web3', 'Ethereum', 'DeFi', 'NFT', 'Cryptocurrency'],
+    'Programming': ['JavaScript', 'Python', 'React', 'TypeScript', 'Node.js', 'Java', 'C#', 'C++', 'Ruby', 'PHP', 'Swift', 'Kotlin', 'Go', 'Golang', 'Rust'],
+    'AI/ML': ['Machine Learning', 'AI', 'TensorFlow', 'PyTorch', 'Data Science', 'NLP', 'Computer Vision'],
+    'Frontend': ['React', 'Angular', 'Vue', 'HTML', 'CSS', 'SCSS', 'Sass', 'TailwindCSS', 'Bootstrap'],
+    'Backend': ['Node.js', 'Express', 'Django', 'Flask', 'Spring', 'ASP.NET', 'Laravel', 'Ruby on Rails', 'FastAPI'],
+    'DevOps': ['AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'CI/CD', 'Jenkins', 'GitHub Actions'],
+    'Databases': ['SQL', 'NoSQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'DynamoDB', 'Cassandra', 'Elasticsearch'],
+    'Other': ['Product Management', 'Leadership', 'Communication', 'Agile', 'Scrum', 'Project Management', 'Team Management']
   };
   
-  // Categorize skills
+  // Categorize skills - only include categories that have at least one matching skill
   const categorizedSkills: Record<string, string[]> = {};
   
   for (const category in skillCategories) {
-    categorizedSkills[category] = skills.filter(skill => 
+    const matchingSkills = skills.filter(skill => 
       skillCategories[category as keyof typeof skillCategories].includes(skill)
     );
+    
+    // Only add the category if there are matching skills
+    if (matchingSkills.length > 0) {
+      categorizedSkills[category] = matchingSkills;
+    }
   }
   
   // Add uncategorized skills to "Other"
@@ -47,7 +56,11 @@ export default function SkillsDisplay({ skills, onSkillToggle }: SkillsDisplayPr
   const uncategorizedSkills = skills.filter(skill => !allCategorizedSkills.includes(skill));
   
   if (uncategorizedSkills.length > 0) {
-    categorizedSkills['Other'] = [...(categorizedSkills['Other'] || []), ...uncategorizedSkills];
+    if (categorizedSkills['Other']) {
+      categorizedSkills['Other'] = [...categorizedSkills['Other'], ...uncategorizedSkills];
+    } else {
+      categorizedSkills['Other'] = uncategorizedSkills;
+    }
   }
   
   // Remove empty categories
