@@ -36,6 +36,16 @@ const getHuggingFaceApiKey = (): string => {
     return 'YOUR_API_KEY_HERE'; // Replace with your actual API key for development
   }
   
+  // Check if the API key is the placeholder value
+  if (apiKey === 'YOUR_API_KEY_HERE') {
+    console.error('Please replace the placeholder API key with your actual Hugging Face API key in .env.local');
+  }
+  
+  // Validate that the API key has the expected format (starts with "hf_")
+  if (!apiKey.startsWith('hf_')) {
+    console.warn('The Hugging Face API key does not have the expected format. It should start with "hf_".');
+  }
+  
   return apiKey;
 };
 
@@ -171,7 +181,9 @@ export const queryHuggingFaceModel = async (
               max_length: 150,
               temperature: 0.7,
               top_p: 0.9,
-              do_sample: true
+              do_sample: true,
+              // Add return_full_text parameter to ensure we get complete responses
+              return_full_text: false
             }
           };
           break;
@@ -260,6 +272,30 @@ export const queryHuggingFaceModel = async (
       
       // Parse the successful response
       const data = await response.json();
+      
+      // Log the response for debugging
+      console.log(`Response from ${modelType} model:`, JSON.stringify(data).substring(0, 200) + '...');
+      
+      // Special handling for INTERVIEW_PREP model which can return different formats
+      if (modelType === ModelType.INTERVIEW_PREP) {
+        // Check if the response is in the expected format
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          console.error('Invalid response format from interview prep model:', data);
+          
+          // If the response is an object with 'generated_text', convert it to the expected array format
+          if (data && typeof data === 'object' && 'generated_text' in data) {
+            return [{ generated_text: data.generated_text }];
+          }
+          
+          // If the response is a string, wrap it in the expected format
+          if (typeof data === 'string') {
+            return [{ generated_text: data }];
+          }
+          
+          // Return a fallback empty response that will trigger the fallback questions
+          return [];
+        }
+      }
       
       // Process the response based on the model type
       switch (modelType) {
@@ -429,6 +465,56 @@ const processSkillVerifierResponse = (data: any, input: string): AgentRunResult 
 // Process GPT-2 response for InterviewPrep
 const processInterviewPrepResponse = (data: any, input: string): AgentRunResult => {
   try {
+    // Check if data is valid and has the expected structure
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      console.error('Invalid data format received from interview prep model:', data);
+      
+      // Use fallback questions based on input only
+      const fallbackQuestions = generateInterviewQuestions('', input);
+      
+      return {
+        success: true,
+        result: {
+          questions: fallbackQuestions,
+          feedback: generateInterviewFeedback(input),
+          note: 'Using fallback questions due to API response format issue'
+        }
+      };
+    }
+
+    // Check if generated_text exists in the response
+    if (!data[0].hasOwnProperty('generated_text')) {
+      console.error('Missing generated_text in model response:', data);
+      
+      // Try to extract text from the response in a different format
+      let generatedText = '';
+      
+      // If the first item is a string, use it directly
+      if (typeof data[0] === 'string') {
+        generatedText = data[0];
+      } 
+      // If the first item has a 'text' property, use that
+      else if (data[0] && typeof data[0] === 'object' && 'text' in data[0]) {
+        generatedText = data[0].text;
+      }
+      // If the data itself is a string, use it
+      else if (typeof data === 'string') {
+        generatedText = data;
+      }
+      
+      // Generate questions using whatever text we could extract
+      const questions = generateInterviewQuestions(generatedText, input);
+      
+      return {
+        success: true,
+        result: {
+          questions,
+          feedback: generateInterviewFeedback(input),
+          note: 'Adapted response format to generate questions'
+        }
+      };
+    }
+    
     // Generate interview questions from the model output
     const questions = generateInterviewQuestions(data[0].generated_text, input);
     
@@ -441,11 +527,70 @@ const processInterviewPrepResponse = (data: any, input: string): AgentRunResult 
     };
   } catch (error) {
     console.error('Error processing interview prep response:', error);
+    
+    // Always provide fallback questions even when there's an error
+    const fallbackQuestions = generateInterviewQuestions('', input);
+    
     return {
-      success: false,
-      error: 'Failed to generate interview questions'
+      success: true,
+      result: {
+        questions: fallbackQuestions,
+        feedback: generateInterviewFeedback(input),
+        note: `Error occurred but using fallback questions: ${error instanceof Error ? error.message : 'Unknown error'}`
+      }
     };
   }
+};
+
+// Mock response for when the Hugging Face API is unavailable
+const mockInterviewPrepResponse = (input: string): AgentRunResult => {
+  console.log('Using mock interview prep response due to API unavailability');
+  
+  // Generate questions based on the input text
+  const questions = [
+    'Tell me about your experience with blockchain technology.',
+    'How have you applied your skills in a challenging project?',
+    'What interests you about this position?',
+    'Describe a situation where you had to learn a new technology quickly.',
+    'How do you stay updated with the latest developments in your field?'
+  ];
+  
+  // Add skill-specific questions based on the input
+  const inputLower = input.toLowerCase();
+  const skillSpecificQuestions: string[] = [];
+  
+  if (inputLower.includes('blockchain') || inputLower.includes('web3') || inputLower.includes('crypto')) {
+    skillSpecificQuestions.push('How do you evaluate the security of a smart contract?');
+    skillSpecificQuestions.push('What blockchain platforms have you worked with?');
+  }
+  
+  if (inputLower.includes('react') || inputLower.includes('frontend') || inputLower.includes('ui')) {
+    skillSpecificQuestions.push('How do you approach state management in React applications?');
+    skillSpecificQuestions.push('What strategies do you use to optimize frontend performance?');
+  }
+  
+  if (inputLower.includes('python') || inputLower.includes('data') || inputLower.includes('machine learning')) {
+    skillSpecificQuestions.push('How have you used Python for data analysis?');
+    skillSpecificQuestions.push('Explain a machine learning model you\'ve implemented.');
+  }
+  
+  if (inputLower.includes('leadership') || inputLower.includes('management') || inputLower.includes('team')) {
+    skillSpecificQuestions.push('How do you motivate team members during challenging projects?');
+    skillSpecificQuestions.push('Describe your approach to resolving conflicts within a team.');
+  }
+  
+  // Combine the default and skill-specific questions
+  const allQuestions = [...questions, ...skillSpecificQuestions];
+  
+  // Return a successful response with the generated questions
+  return {
+    success: true,
+    result: {
+      questions: allQuestions.slice(0, 5),
+      feedback: 'Focus on concrete examples and quantifiable results in your answers.',
+      note: 'Generated using offline mode due to API unavailability'
+    }
+  };
 };
 
 // Helper functions for NLP processing
@@ -716,30 +861,73 @@ const generateAnalysisSummary = (skills: string[], jobMatches: JobMatch[]): stri
 };
 
 const generateInterviewQuestions = (generatedText: string, input: string): string[] => {
-  // In a production environment, this would parse the model output
-  // For now, we'll generate some relevant questions based on input keywords
-  const defaultQuestions = [
-    'Describe your experience with blockchain technology.',
-    'How have you integrated AI into previous projects?',
-    'What challenges did you face in your last role?'
-  ];
-  
-  // Add more questions based on skills in the input
-  const additionalQuestions: string[] = [];
-  
-  if (input.toLowerCase().includes('blockchain')) {
-    additionalQuestions.push('How do you stay updated with the latest blockchain developments?');
+  try {
+    // Default questions that will always be available
+    const defaultQuestions = [
+      'Describe your experience with blockchain technology.',
+      'How have you integrated AI into previous projects?',
+      'What challenges did you face in your last role?',
+      'Tell me about a project you\'re particularly proud of.',
+      'How do you approach learning new technologies?'
+    ];
+    
+    // Add more questions based on skills in the input
+    const additionalQuestions: string[] = [];
+    
+    // Convert input to lowercase for case-insensitive matching
+    const inputLower = input.toLowerCase();
+    
+    // Check for various skills and add relevant questions
+    if (inputLower.includes('blockchain')) {
+      additionalQuestions.push('How do you stay updated with the latest blockchain developments?');
+      additionalQuestions.push('Explain a complex blockchain concept in simple terms.');
+    }
+    
+    if (inputLower.includes('leadership') || inputLower.includes('manager') || inputLower.includes('management')) {
+      additionalQuestions.push('Describe a situation where you had to lead a team through a difficult project.');
+      additionalQuestions.push('How do you handle conflicts within your team?');
+    }
+    
+    if (inputLower.includes('react') || inputLower.includes('frontend') || inputLower.includes('front-end')) {
+      additionalQuestions.push('What React design patterns do you commonly use in your projects?');
+      additionalQuestions.push('How do you optimize performance in a React application?');
+    }
+    
+    if (inputLower.includes('python') || inputLower.includes('data science') || inputLower.includes('machine learning')) {
+      additionalQuestions.push('How have you used Python for data analysis or machine learning?');
+      additionalQuestions.push('Explain a complex algorithm you\'ve implemented.');
+    }
+    
+    // Try to extract questions from the generated text if available
+    const extractedQuestions: string[] = [];
+    if (generatedText && typeof generatedText === 'string') {
+      // Look for question patterns in the generated text
+      const questionMatches = generatedText.match(/(?:\?|^|\.|\n)([^.?!]*\?)/g);
+      if (questionMatches) {
+        extractedQuestions.push(
+          ...questionMatches
+            .map(q => q.trim().replace(/^[.!?]\s*/, ''))
+            .filter(q => q.length > 10 && q.length < 200)
+        );
+      }
+    }
+    
+    // Combine all questions and remove duplicates
+    const allQuestions = [...new Set([...extractedQuestions, ...additionalQuestions, ...defaultQuestions])];
+    
+    // Return up to 5 questions, prioritizing extracted and additional questions
+    return allQuestions.slice(0, 5);
+  } catch (error) {
+    console.error('Error generating interview questions:', error);
+    // Return default questions if there's an error
+    return [
+      'Tell me about your background and experience.',
+      'What are your key technical skills?',
+      'Describe a challenging project you worked on.',
+      'How do you approach problem-solving?',
+      'What are your career goals?'
+    ];
   }
-  
-  if (input.toLowerCase().includes('leadership')) {
-    additionalQuestions.push('Describe a situation where you had to lead a team through a difficult project.');
-  }
-  
-  if (input.toLowerCase().includes('react')) {
-    additionalQuestions.push('What React design patterns do you commonly use in your projects?');
-  }
-  
-  return [...defaultQuestions, ...additionalQuestions].slice(0, 5);
 };
 
 const generateInterviewFeedback = (input: string): string => {
@@ -854,6 +1042,23 @@ export const runAgent = async (agent: Agent, input: string): Promise<AgentRunRes
   try {
     console.log(`Running agent: ${agent.name} with input length: ${input.length}`);
     
+    // Check if we should use mock responses (for development/testing or when API is down)
+    const useMockResponses = process.env.NEXT_PUBLIC_USE_MOCK_RESPONSES === 'true';
+    
+    if (useMockResponses) {
+      console.log('Using mock responses as configured in environment variables');
+      
+      // Return mock responses based on agent type
+      switch (agent.type) {
+        case ModelType.INTERVIEW_PREP:
+          return mockInterviewPrepResponse(input);
+        // Add other mock responses as needed
+        default:
+          // For other agent types, continue with the normal API call
+          break;
+      }
+    }
+    
     // Query the Hugging Face model
     const result = await queryHuggingFaceModel(agent.endpoint, input, agent.type);
     
@@ -878,6 +1083,12 @@ export const runAgent = async (agent: Agent, input: string): Promise<AgentRunRes
     }
   } catch (error: any) {
     console.error(`Error running agent ${agent.name}:`, error);
+    
+    // Provide fallback responses for specific agent types when there's an error
+    if (agent.type === ModelType.INTERVIEW_PREP) {
+      return mockInterviewPrepResponse(input);
+    }
+    
     return {
       success: false,
       error: error.message || 'Failed to run the agent'
