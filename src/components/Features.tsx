@@ -313,7 +313,7 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
               {/* In a real application, this would be an actual image or interactive demo */}
               <div className="aspect-w-16 aspect-h-9 bg-gray-900 flex items-center justify-center p-8">
                 <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500">Team Matching Visualization</span>
+                  <img src="/visualization.png"></img>
                 </div>
               </div>
             </div>

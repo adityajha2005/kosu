@@ -100,32 +100,32 @@ export default function Hero() {
     eventSetup: {
       title: "One-Click Event Creation",
       description: "Create customizable hackathon landing pages with just one click. Set up registration, rules, prizes, and more in minutes.",
-      image: "/api/placeholder/400/320"
+      image: "/event.png" 
     },
     teamMatching: {
       title: "AI-Powered Team Matching",
       description: "Our AI analyzes skills, experience, and interests to suggest ideal teammates, making collaboration effortless and productive.",
-      image: "/api/placeholder/400/320"
+      image: "/teammatching.png" // Add your image URL here
     },
     nftSwags: {
       title: "NFT-Based Event Swags",
       description: "Distribute secure NFT tickets and engagement badges as digital collectibles that showcase participation and achievements.",
-      image: "/api/placeholder/400/320"
+      image: "/nft.png" // Add your image URL here
     },
     problemStatements: {
       title: "Dynamic Problem Statements",
       description: "Generate tailored challenges based on sponsor needs using AI to ensure relevant and impactful hackathon projects.",
-      image: "/api/placeholder/400/320"
+      image: "/problems.png" // Add your image URL here
     },
     codeEvaluation: {
       title: "Automated Code Evaluation",
       description: "AI analyzes code quality, functionality, and security before final judging to ensure fair and comprehensive assessment.",
-      image: "/api/placeholder/400/320"
+      image: "/code.jpg" // Add your image URL here
     },
     smartHiring: {
       title: "AI-Powered Smart Hiring",
       description: "Filter participants using OCEAN personality traits and technical skills to identify ideal candidates for your organization.",
-      image: "/api/placeholder/400/320"
+      image: "/hiring.png" // Add your image URL here
     }
   };
   type FeatureKey = keyof typeof demoFeatures;
@@ -133,7 +133,7 @@ export default function Hero() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-slate-900 text-gray-100">
       <Head>
-        <title>HackLaunch | AI-Powered Hackathon Platform</title>
+        <title>KOSU | AI-Powered Hackathon Platform</title>
         <meta name="description" content="Seamless hackathon organization platform with AI automation and blockchain rewards" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -470,7 +470,7 @@ export default function Hero() {
                     <motion.li 
                       key={feature}
                       className={`p-3 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-3 ${activeDemoFeature === feature ? 'bg-blue-600/30 border border-blue-500/50' : 'hover:bg-gray-700/30'}`}
-                      onClick={() => setActiveDemoFeature(feature)}
+                      onClick={() => setActiveDemoFeature(feature as FeatureKey)}
                       whileHover={{ x: 5 }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -523,7 +523,7 @@ export default function Hero() {
             >
               <h2 className="text-3xl font-bold mb-4 text-white">For Every Stakeholder</h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                HackLaunch creates value for everyone involved in the hackathon ecosystem, from organizers to participants.
+                KOSU creates value for everyone involved in the hackathon ecosystem, from organizers to participants.
               </p>
             </motion.div>
 
@@ -599,7 +599,7 @@ export default function Hero() {
                     </ul>
                   </div>
                   <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-                    <img src="/api/placeholder/400/320" alt="Organizer Dashboard" className="w-full h-auto" />
+                    <img src="/organizer.png" alt="Organizer Dashboard" className="w-full h-auto" />
                   </div>
                 </motion.div>
               )}
@@ -646,7 +646,7 @@ export default function Hero() {
                     </ul>
                   </div>
                   <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-                    <img src="/api/placeholder/400/320" alt="Candidate Profile" className="w-full h-auto" />
+                    <img src="/candidate.png" alt="Candidate Profile" className="w-full h-auto" />
                   </div>
                 </motion.div>
               )}
@@ -693,7 +693,7 @@ export default function Hero() {
                     </ul>
                   </div>
                   <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-                    <img src="/api/placeholder/400/320" alt="Sponsor Dashboard" className="w-full h-auto" />
+                    <img src="/sponsor.png" alt="Sponsor Dashboard" className="w-full h-auto" />
                   </div>
                 </motion.div>
               )}
@@ -822,7 +822,7 @@ export default function Hero() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
               >
-                Join thousands of organizers, participants, and sponsors who are already using HackLaunch to create impactful tech events and discover opportunities.
+                Join thousands of organizers, participants, and sponsors who are already using KOSU to create impactful tech events and discover opportunities.
               </motion.p>
               <motion.div
                 className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -857,10 +857,10 @@ export default function Hero() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">HL</span>
+                  <span className="text-white font-bold text-xl">K</span>
                 </div>
                 <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 inline-block text-transparent bg-clip-text">
-                  HackLaunch
+                  KOSU
                 </h2>
               </div>
               <p className="text-gray-400 mb-4">
@@ -917,7 +917,7 @@ export default function Hero() {
           </div>
           
           <div className="border-t border-gray-800 mt-10 pt-8 flex flex-col md:flex-row justify-between">
-            <p className="text-gray-500 text-sm">© 2025 HackLaunch. All rights reserved.</p>
+            <p className="text-gray-500 text-sm">© 2025 KOSU. All rights reserved.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-500 hover:text-blue-400 text-sm">Terms of Service</a>
               <a href="#" className="text-gray-500 hover:text-blue-400 text-sm">Privacy Policy</a>

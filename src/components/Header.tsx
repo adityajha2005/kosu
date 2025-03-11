@@ -16,7 +16,7 @@ function Header () {
     <div className="container mx-auto px-4 py-3 flex justify-between items-center">
       <div className="flex items-center gap-2">
         <div className="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-xl">HL</span>
+          <span className="text-white font-bold text-xl">KS</span>
         </div>
         <motion.h1
           initial={{ opacity: 0, x: -20 }}
@@ -24,7 +24,7 @@ function Header () {
           transition={{ duration: 0.5 }}
           className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 inline-block text-transparent bg-clip-text"
         >
-          HackLaunch
+          KOSU
         </motion.h1>
       </div>
 
@@ -98,9 +98,9 @@ function Header () {
             <a href="#" className="text-gray-400 hover:text-blue-400 font-medium py-2">Resources</a>
             <div className="flex gap-4 pt-2">
               <button className="text-blue-400 font-medium">Log in</button>
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium">
-                Sign up free
-              </button>
+                <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium">
+                Sign up for free
+                </button>
             </div>
           </div>
         </motion.div>
