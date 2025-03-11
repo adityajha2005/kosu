@@ -136,7 +136,10 @@ export default function Dashboard() {
       return;
     }
     
-    setJobMatches(matches);
+    // Sort matches by match percentage in descending order
+    const sortedMatches = [...matches].sort((a, b) => b.matchPercentage - a.matchPercentage);
+    
+    setJobMatches(sortedMatches);
     setExtractedSkills(skills);
     setIsResumeAnalyzed(true);
     setShowNotification(true);
@@ -150,7 +153,7 @@ export default function Dashboard() {
     // Automatically switch to matches tab to show results
     setActiveTab('matches');
     
-    console.log('Resume analysis complete:', { matches, skills });
+    console.log('Resume analysis complete:', { matches: sortedMatches, skills });
   };
 
   if (!address) {
@@ -408,7 +411,13 @@ export default function Dashboard() {
                           <h3 className="font-medium text-blue-400">{job.title}</h3>
                           <p className="text-gray-400 text-sm">{job.company} • {job.location}</p>
                         </div>
-                        <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-full">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          job.matchPercentage >= 80 ? 'bg-green-500/20 text-green-400' : 
+                          job.matchPercentage >= 60 ? 'bg-blue-500/20 text-blue-400' :
+                          job.matchPercentage >= 40 ? 'bg-yellow-500/20 text-yellow-400' :
+                          job.matchPercentage >= 20 ? 'bg-orange-500/20 text-orange-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
                           {job.matchPercentage}% Match
                         </span>
                       </div>
@@ -623,7 +632,13 @@ export default function Dashboard() {
                           <h3 className="font-medium text-blue-400">{job.title}</h3>
                           <p className="text-gray-400 text-sm">{job.company} • {job.location}</p>
                         </div>
-                        <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-full">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          job.matchPercentage >= 80 ? 'bg-green-500/20 text-green-400' : 
+                          job.matchPercentage >= 60 ? 'bg-blue-500/20 text-blue-400' :
+                          job.matchPercentage >= 40 ? 'bg-yellow-500/20 text-yellow-400' :
+                          job.matchPercentage >= 20 ? 'bg-orange-500/20 text-orange-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
                           {job.matchPercentage}% Match
                         </span>
                       </div>

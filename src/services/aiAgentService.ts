@@ -451,21 +451,58 @@ const processInterviewPrepResponse = (data: any, input: string): AgentRunResult 
 // Helper functions for NLP processing
 const extractSkillsFromResume = (resumeText: string): string[] => {
   // In a production environment, this would use a proper NLP library
-  // For now, we'll use a simple keyword extraction approach
+  // For now, we'll use a simple keyword extraction approach with improved matching
+  
+  // Define skill keywords with variations
   const skillKeywords = [
-    'JavaScript', 'TypeScript', 'React', 'Angular', 'Vue', 'Node.js',
-    'Python', 'Java', 'C#', 'C++', 'Ruby', 'PHP', 'Swift', 'Kotlin',
-    'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'CI/CD',
-    'SQL', 'NoSQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis',
-    'Machine Learning', 'AI', 'Data Science', 'TensorFlow', 'PyTorch',
-    'Blockchain', 'Smart Contracts', 'Solidity', 'Web3', 'Ethereum', 'Aptos', 'Move',
-    'Product Management', 'Agile', 'Scrum', 'Leadership', 'API Integration'
+    // Programming Languages
+    'JavaScript', 'JS', 'TypeScript', 'TS', 'Python', 'Java', 'C#', 'C++', 'Ruby', 'PHP', 'Swift', 'Kotlin', 'Go', 'Golang', 'Rust',
+    
+    // Frontend
+    'React', 'React.js', 'Angular', 'Vue', 'Vue.js', 'Next.js', 'Svelte', 'HTML', 'CSS', 'SCSS', 'Sass', 'TailwindCSS', 'Bootstrap',
+    
+    // Backend
+    'Node.js', 'Express', 'Django', 'Flask', 'Spring', 'ASP.NET', 'Laravel', 'Ruby on Rails', 'FastAPI',
+    
+    // Cloud & DevOps
+    'AWS', 'Amazon Web Services', 'Azure', 'GCP', 'Google Cloud', 'Docker', 'Kubernetes', 'K8s', 'CI/CD', 'Jenkins', 'GitHub Actions',
+    
+    // Databases
+    'SQL', 'NoSQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'DynamoDB', 'Cassandra', 'Elasticsearch',
+    
+    // AI & Data Science
+    'Machine Learning', 'ML', 'AI', 'Artificial Intelligence', 'Data Science', 'TensorFlow', 'PyTorch', 'NLP', 'Computer Vision',
+    
+    // Blockchain
+    'Blockchain', 'Smart Contracts', 'Solidity', 'Web3', 'Ethereum', 'Aptos', 'Move', 'DeFi', 'NFT', 'Cryptocurrency',
+    
+    // Soft Skills & Management
+    'Product Management', 'Agile', 'Scrum', 'Leadership', 'Project Management', 'Team Management',
+    
+    // Other Technical Skills
+    'API Integration', 'REST API', 'GraphQL', 'Microservices', 'Testing', 'Unit Testing', 'QA', 'UI/UX', 'Mobile Development'
   ];
   
-  // Extract skills that appear in the resume text
-  return skillKeywords.filter(skill => 
-    resumeText.toLowerCase().includes(skill.toLowerCase())
-  );
+  // Normalize the resume text (lowercase and remove punctuation)
+  const normalizedText = resumeText.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ');
+  
+  // Extract skills that appear in the resume text with more flexible matching
+  const foundSkills = new Set<string>();
+  
+  skillKeywords.forEach(skill => {
+    const normalizedSkill = skill.toLowerCase();
+    
+    // Check if the skill appears as a whole word in the text
+    // Escape special regex characters in the skill name
+    const escapedSkill = normalizedSkill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
+    
+    if (regex.test(normalizedText)) {
+      foundSkills.add(skill);
+    }
+  });
+  
+  return Array.from(foundSkills);
 };
 
 const extractExperienceFromResume = (resumeText: string): string[] => {
@@ -549,19 +586,45 @@ const generateJobMatches = (skills: string[], modelData: any): JobMatch[] => {
   
   // Calculate match percentage for each job
   return jobTemplates.map((job, index) => {
-    const matchingSkills = job.requiredSkills.filter(skill => 
-      skills.some(s => s.toLowerCase() === skill.toLowerCase())
+    // Improved skill matching with more flexible comparison
+    const matchingSkills = job.requiredSkills.filter(requiredSkill => 
+      skills.some(candidateSkill => {
+        // Convert both to lowercase for case-insensitive comparison
+        const reqSkill = requiredSkill.toLowerCase();
+        const candSkill = candidateSkill.toLowerCase();
+        
+        // Normalize skills by removing special characters for safer comparison
+        const normalizeSkill = (skill: string) => skill.replace(/[.*+?^${}()|[\]\\]/g, '');
+        const normalizedReqSkill = normalizeSkill(reqSkill);
+        const normalizedCandSkill = normalizeSkill(candSkill);
+        
+        // Check for exact match or if candidate skill contains the required skill
+        return reqSkill === candSkill || 
+               candSkill.includes(reqSkill) || 
+               reqSkill.includes(candSkill) ||
+               normalizedCandSkill.includes(normalizedReqSkill) || 
+               normalizedReqSkill.includes(normalizedCandSkill);
+      })
     );
     
+    // Calculate raw match percentage
     const matchPercentage = Math.round((matchingSkills.length / job.requiredSkills.length) * 100);
+    
+    // Create description based on matching skills
+    let description = '';
+    if (matchingSkills.length > 0) {
+      description = `Your skills in ${matchingSkills.join(', ')} align with this position.`;
+    } else {
+      description = 'This position requires skills that weren\'t found in your resume.';
+    }
     
     return {
       id: (index + 1).toString(),
       title: job.title,
       company: job.company,
       location: job.location,
-      matchPercentage: Math.min(Math.max(matchPercentage, 60), 98), // Keep between 60-98%
-      description: `Your skills in ${matchingSkills.join(', ')} align with this position.`,
+      matchPercentage: matchPercentage, // Use actual match percentage without artificial constraints
+      description: description,
       skills: job.requiredSkills,
       datePosted: `${Math.floor(Math.random() * 14) + 1} days ago`
     };
