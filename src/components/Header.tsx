@@ -1,13 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import Link from "next/link";
 declare global {
   interface Window {
     aptos?: {
       connect: () => Promise<{ address: string }>;
+      disconnect: () => Promise<void>;
     };
   }
 }
@@ -15,7 +16,27 @@ declare global {
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userAddress, setUserAddress] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
+
+  //checking if user is already connected
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        if (window.aptos) {
+          const storedAddress = localStorage.getItem('userWalletAddress');
+          if (storedAddress) {
+            setUserAddress(storedAddress);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking connection:", error);
+      }
+    };
+    
+    checkConnection();
+  }, []);
 
   const handlePetraWalletConnection = async () => {
     try {
@@ -31,12 +52,36 @@ function Header() {
         throw new Error("No address found in connection response.");
       }
 
+      //storing address in local storage
+      localStorage.setItem('userWalletAddress', address);
+      setUserAddress(address);
+      
       alert("Petra Wallet Connected Successfully!");
-      router.push("/home");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Failed to connect to Petra Wallet:", error);
       alert(`Failed to connect: ${(error as Error).message}`);
     }
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (window.aptos) {
+        await window.aptos.disconnect();
+      }
+      localStorage.removeItem('userWalletAddress');
+      setUserAddress(null);
+      setDropdownOpen(false);
+      router.push("/");
+    } catch (error) {
+      console.error("Failed to disconnect:", error);
+    }
+  };
+
+  //=shorten address for display
+  const shortenAddress = (address: string) => {
+    if (!address) return "";
+    return `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
   };
 
   return (
@@ -84,21 +129,44 @@ function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <motion.button
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handlePetraWalletConnection}
-          >
-            Log in
-          </motion.button>
-          {/* <motion.button
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium"
-            whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(79, 70, 229, 0.5)" }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Sign up for free
-          </motion.button> */}
+          {userAddress ? (
+            <div className="relative">
+              <motion.button
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer flex items-center gap-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                {shortenAddress(userAddress)}
+                <ChevronDown size={16} />
+              </motion.button>
+              
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg overflow-hidden z-50">
+                  <Link href="/dashboard">
+                    <div className="px-4 py-2 text-gray-200 hover:bg-gray-700 cursor-pointer">
+                      Dashboard
+                    </div>
+                  </Link>
+                  <div 
+                    className="px-4 py-2 text-gray-200 hover:bg-gray-700 cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <motion.button
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handlePetraWalletConnection}
+            >
+              Log in
+            </motion.button>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -129,15 +197,32 @@ function Header() {
               <Link href="/resources" className="text-gray-400 hover:text-blue-400 font-medium py-2">
                 Resources
               </Link>
-              <div className="flex gap-4 pt-2">
-                <button onClick={handlePetraWalletConnection} 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
-                >Log in</button>
-                {/* <button 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
-                >
-                  Sign up for free
-                </button> */}
+              <div className="flex flex-col gap-4 pt-2">
+                {userAddress ? (
+                  <>
+                    <div className="text-gray-200 font-medium py-2">
+                      {shortenAddress(userAddress)}
+                    </div>
+                    <Link href="/dashboard">
+                      <div className="text-gray-400 hover:text-blue-400 font-medium py-2">
+                        Dashboard
+                      </div>
+                    </Link>
+                    <div 
+                      className="text-gray-400 hover:text-blue-400 font-medium py-2 cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </div>
+                  </>
+                ) : (
+                  <button 
+                    onClick={handlePetraWalletConnection} 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
+                  >
+                    Log in
+                  </button>
+                )}
               </div>
             </div>
           </motion.div>
