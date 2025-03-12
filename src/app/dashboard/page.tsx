@@ -197,6 +197,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
+   
       <div className="container mx-auto px-4 py-8">
         {/* Notification */}
         {showNotification && (
@@ -382,6 +383,7 @@ export default function Dashboard() {
                     </div>
                   ))}
                   
+                  
                   <button 
                     onClick={deployNewAgent}
                     className="w-full py-3 px-4 rounded-lg font-medium transition-colors bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white"
@@ -389,8 +391,11 @@ export default function Dashboard() {
                     Deploy New Agent
                   </button>
                 </div>
+    
               </div>
+              
             </div>
+            
           </div>
         )}
 
