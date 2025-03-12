@@ -72,27 +72,27 @@ export default function Dashboard() {
   
   const router = useRouter();
 
-  // useEffect(() => {
-  //   // Check if user is connected
-  //   const checkConnection = async () => {
-  //     try {
-  //       if (typeof window !== 'undefined') {
-  //         const storedAddress = localStorage.getItem('userWalletAddress');
-  //         if (storedAddress) {
-  //           setAddress(storedAddress);
-  //         } else {
-  //           // Redirect to home if not connected
-  //           router.push('/');
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Error checking connection:", error);
-  //       router.push('/');
-  //     }
-  //   };
+  useEffect(() => {
+    // Check if user is connected
+    const checkConnection = async () => {
+      try {
+        if (typeof window !== 'undefined') {
+          const storedAddress = localStorage.getItem('userWalletAddress');
+          if (storedAddress) {
+            setAddress(storedAddress);
+          } else {
+            // Redirect to home if not connected
+            router.push('/');
+          }
+        }
+      } catch (error) {
+        console.error("Error checking connection:", error);
+        router.push('/');
+      }
+    };
     
-  //   checkConnection();
-  // }, [router]);
+    checkConnection();
+  }, [router]);
 
   // Simulate assessment progress
   useEffect(() => {
@@ -187,13 +187,13 @@ export default function Dashboard() {
     console.log('Resume analysis complete:', { matches: sortedMatches, skills });
   };
 
-  // if (!address) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-  //       <div className="animate-pulse">Loading...</div>
-  //     </div>
-  //   );
-  // }
+  if (!address) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
