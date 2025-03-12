@@ -6,9 +6,20 @@ import { runAgent, trainAgent, Agent } from '../services/aiAgentService';
 interface AgentInteractionProps {
   agent: Agent;
   onAgentUpdate: (updatedAgent: Agent) => void;
+  onClose: () => void;
+  onPauseAgent: (agent: Agent) => Promise<void>;
+  onActivateAgent: (agent: Agent) => Promise<void>;
+  onTrainAgent: (agent: Agent, trainingData: string) => Promise<void>;
 }
 
-export default function AgentInteraction({ agent, onAgentUpdate }: AgentInteractionProps) {
+export default function AgentInteraction({ 
+  agent, 
+  onAgentUpdate, 
+  onClose,
+  onPauseAgent,
+  onActivateAgent,
+  onTrainAgent
+}: AgentInteractionProps) {
   const [input, setInput] = useState('');
   const [result, setResult] = useState<AgentRunResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +64,13 @@ export default function AgentInteraction({ agent, onAgentUpdate }: AgentInteract
       console.error('Error training agent:', error);
     } finally {
       setIsTraining(false);
+    }
+  };
+
+  // Add a close button handler
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
     }
   };
 

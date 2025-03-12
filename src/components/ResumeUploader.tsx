@@ -7,9 +7,10 @@ import { initPdfJs, extractTextFromFile } from '../services/pdfService';
 interface ResumeUploaderProps {
   talentScoutAgent: Agent;
   onAnalysisComplete: (matches: JobMatch[], skills: string[]) => void;
+  onError?: (error: string) => void;
 }
 
-export default function ResumeUploader({ talentScoutAgent, onAnalysisComplete }: ResumeUploaderProps) {
+export default function ResumeUploader({ talentScoutAgent, onAnalysisComplete, onError }: ResumeUploaderProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -150,7 +151,7 @@ export default function ResumeUploader({ talentScoutAgent, onAnalysisComplete }:
         errorMessage = error.message;
       }
       
-      setError(errorMessage);
+      handleError(errorMessage);
       setAnalysisProgress(0);
     } finally {
       setIsAnalyzing(false);
@@ -171,6 +172,13 @@ export default function ResumeUploader({ talentScoutAgent, onAnalysisComplete }:
     setAnalysisProgress(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleError = (errorMessage: string) => {
+    setError(errorMessage);
+    if (onError) {
+      onError(errorMessage);
     }
   };
 
