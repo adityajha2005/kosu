@@ -165,9 +165,20 @@ export default function EventsPage() {
               transition={{ duration: 0.5, delay: hackathon.id * 0.1 }}
               className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden hover:shadow-lg hover:shadow-blue-900/20 transition-all duration-300"
             >
-              {/* Using a colored div instead of an external image */}
-              <div className={`h-48 w-full ${hackathon.bgColor} flex items-center justify-center`}>
-                <h3 className="text-white text-2xl font-bold">{hackathon.title}</h3>
+              <div className={`h-48 w-full ${hackathon.bgColor} relative overflow-hidden group`}>
+                <Image
+                  src={hackathon.image}
+                  alt={hackathon.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  quality={85}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
+                <h3 className="absolute bottom-4 left-4 text-white text-2xl font-bold z-10">
+                  {hackathon.title}
+                </h3>
               </div>
               <div className="p-6">
                 <h2 className="text-2xl font-bold mb-2 text-blue-400">{hackathon.title}</h2>

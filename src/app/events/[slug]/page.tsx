@@ -112,7 +112,10 @@ export default function EventDetailPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Hero section */}
-      <div className={`relative py-20 ${hackathon.bgColor}`}>
+      <div className={`relative py-20 ${hackathon.bgColor} bg-cover bg-center`} style={{ backgroundImage: `url(${hackathon.image})` }}>
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/50"></div>
+        {/* Optional grid overlay */}
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20"></div>
         <div className="container mx-auto px-4 relative z-10">
           <Link 
