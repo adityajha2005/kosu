@@ -4,15 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import Link from "next/link";
-declare global {
-  interface Window {
-    aptos?: {
-      connect: () => Promise<{ address: string }>;
-      disconnect: () => Promise<void>;
-    };
-  }
-}
-
+// The window.aptos interface is already defined in aptosService.ts
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

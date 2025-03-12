@@ -7,6 +7,7 @@ import AgentInteraction from '../../components/AgentInteraction';
 import CreateAgentModal from '../../components/CreateAgentModal';
 import ResumeUploader from '../../components/ResumeUploader';
 import RegisteredHackathons from '../../components/RegisteredHackathons';
+import NFTMinter from '../../components/NFTMinter';
 
 // Let's update the ResumeUploader component to accept an onError prop
 interface ExtendedResumeUploaderProps {
@@ -37,6 +38,7 @@ export default function Dashboard() {
   const [isResumeAnalyzed, setIsResumeAnalyzed] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [notificationMessage, setNotificationMessage] = useState<string>('Resume analysis complete! View your job matches.');
   
   const [jobMatches, setJobMatches] = useState<JobMatch[]>([
     {
@@ -170,6 +172,7 @@ export default function Dashboard() {
     setJobMatches(sortedMatches);
     setExtractedSkills(skills);
     setIsResumeAnalyzed(true);
+    setNotificationMessage('Resume analysis complete! View your job matches.');
     setShowNotification(true);
     setAnalysisError(null);
     
@@ -195,6 +198,54 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
+        {/* Notification */}
+        {showNotification && (
+          <div className="fixed top-4 right-4 z-50 max-w-md">
+            <div className="bg-green-900/80 backdrop-blur-sm border border-green-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center">
+              <div className="mr-3 bg-green-500 rounded-full p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium">{notificationMessage}</p>
+              </div>
+              <button 
+                onClick={() => setShowNotification(false)}
+                className="ml-auto text-green-200 hover:text-white"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {/* Error notification */}
+        {analysisError && (
+          <div className="fixed top-4 right-4 z-50 max-w-md">
+            <div className="bg-red-900/80 backdrop-blur-sm border border-red-700 text-white px-4 py-3 rounded-lg shadow-lg flex items-center">
+              <div className="mr-3 bg-red-500 rounded-full p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium">{analysisError}</p>
+              </div>
+              <button 
+                onClick={() => setAnalysisError(null)}
+                className="ml-auto text-red-200 hover:text-white"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">Dashboard</h1>
@@ -287,6 +338,22 @@ export default function Dashboard() {
             <div className="space-y-6">
               {/* New Registered Hackathons Component */}
               <RegisteredHackathons userAddress={address} />
+              
+              {/* NFT Minter Component */}
+              <NFTMinter 
+                userAddress={address} 
+                onMintSuccess={() => {
+                  // Show success notification
+                  setNotificationMessage('NFT minted successfully! Check your wallet for the new NFT.');
+                  setShowNotification(true);
+                  setTimeout(() => {
+                    setShowNotification(false);
+                  }, 5000);
+                }}
+                onMintError={(error) => {
+                  setAnalysisError(error);
+                }}
+              />
               
               {/* AI Agents preview */}
               <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
