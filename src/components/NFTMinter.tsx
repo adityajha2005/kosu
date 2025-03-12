@@ -309,7 +309,9 @@ export default function NFTMinter({ userAddress, onMintSuccess, onMintError }: N
       const result = await testWalletConnection();
       
       if (result.success) {
-        setWalletTestResult(`✅ ${result.message} - Address: ${result.address}`);
+        // Format the address to prevent line breaks
+        const shortenedAddress = `${result.address.substring(0, 6)}...${result.address.substring(result.address.length - 4)}`;
+        setWalletTestResult(`✅ Petra wallet is properly connected - Address: ${shortenedAddress}`);
         
         // Update wallet status
         setWalletStatus({
@@ -375,7 +377,7 @@ export default function NFTMinter({ userAddress, onMintSuccess, onMintError }: N
               <div className="bg-gray-800 rounded p-3 mb-4">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400 text-sm">Contract</span>
-                  <span className="text-white text-sm font-mono truncate max-w-[200px]">0xfc053e7122749e01dfb70f94d62f78833385ffdaa321e7d6faa50957371ec26</span>
+                  <span className="text-white text-sm font-mono truncate max-w-[180px]">0xfc053e7122749e01dfb70f94d62f78833385ffdaa321e7d6faa50957371ec26</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400 text-sm">Function</span>
@@ -435,9 +437,9 @@ export default function NFTMinter({ userAddress, onMintSuccess, onMintError }: N
             <span className="ml-1 font-medium text-white">{walletStatus.connected ? 'Yes' : 'No'}</span>
           </div>
           {walletStatus.address && (
-            <div className="col-span-2 truncate">
+            <div className="col-span-2 flex items-center">
               <span className="text-gray-300">Address:</span>
-              <span className="ml-1 font-medium text-white">{`${walletStatus.address.substring(0, 6)}...${walletStatus.address.substring(walletStatus.address.length - 4)}`}</span>
+              <span className="ml-1 font-medium text-white truncate max-w-[150px]">{`${walletStatus.address.substring(0, 6)}...${walletStatus.address.substring(walletStatus.address.length - 4)}`}</span>
             </div>
           )}
         </div>
@@ -489,7 +491,7 @@ export default function NFTMinter({ userAddress, onMintSuccess, onMintError }: N
             ? "bg-green-900/50 border border-green-700 text-green-200" 
             : "bg-red-900/50 border border-red-700 text-red-200"
         } px-4 py-2 rounded-md mb-4`}>
-          {walletTestResult}
+          <div className="break-words">{walletTestResult}</div>
         </div>
       )}
       
