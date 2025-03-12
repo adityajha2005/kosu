@@ -126,6 +126,14 @@ function Header() {
               Resources
             </Link>
           </motion.div>
+          <motion.div
+            whileHover={{ y: -2 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <Link href="/events" className="text-gray-400 hover:text-blue-400 font-medium">
+              Events
+            </Link>
+          </motion.div>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -196,6 +204,9 @@ function Header() {
               </Link>
               <Link href="/resources" className="text-gray-400 hover:text-blue-400 font-medium py-2">
                 Resources
+              </Link>
+              <Link href="/events" className="text-gray-400 hover:text-blue-400 font-medium py-2">
+                Events
               </Link>
               <div className="flex flex-col gap-4 pt-2">
                 {userAddress ? (

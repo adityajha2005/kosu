@@ -17,6 +17,7 @@ import {
   Database
 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 
 
@@ -183,13 +184,15 @@ export default function Hero() {
                       transition={{ duration: 0.3 }}
                     />
                   </motion.button>
-                  <motion.button
-                    className="border border-gray-700 bg-gray-800 text-gray-300 px-8 py-3 rounded-lg font-medium"
-                    whileHover={{ scale: 1.05, backgroundColor: "rgba(30, 41, 59, 0.8)" }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Explore Events
-                  </motion.button>
+                  <Link href="/events">
+                    <motion.button
+                      className="border border-gray-700 bg-gray-800 text-gray-300 px-8 py-3 rounded-lg font-medium"
+                      whileHover={{ scale: 1.05, backgroundColor: "rgba(30, 41, 59, 0.8)" }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Explore Events
+                    </motion.button>
+                  </Link>
                 </motion.div>
               </div>
               <div className="md:w-1/2">
@@ -286,20 +289,24 @@ export default function Hero() {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 1.6, duration: 0.5 }}
                     >
-                      <motion.button
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                        whileHover={{ scale: 1.05, backgroundColor: "#3b82f6" }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        View Details
-                      </motion.button>
-                      <motion.button
-                        className="flex-1 border border-gray-700 bg-gray-700/50 text-gray-300 px-4 py-2 rounded-lg text-sm font-medium"
-                        whileHover={{ scale: 1.05, backgroundColor: "rgba(55, 65, 81, 0.7)" }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        Register Now
-                      </motion.button>
+                      <Link href="/events/web3-developer-hackathon" className="flex-1">
+                        <motion.button
+                          className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                          whileHover={{ scale: 1.05, backgroundColor: "#3b82f6" }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          View Details
+                        </motion.button>
+                      </Link>
+                      <Link href="/events/web3-developer-hackathon/register" className="flex-1">
+                        <motion.button
+                          className="w-full border border-gray-700 bg-gray-700/50 text-gray-300 px-4 py-2 rounded-lg text-sm font-medium"
+                          whileHover={{ scale: 1.05, backgroundColor: "rgba(55, 65, 81, 0.7)" }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Register Now
+                        </motion.button>
+                      </Link>
                     </motion.div>
                   </div>
                 </motion.div>
@@ -766,20 +773,24 @@ export default function Hero() {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <motion.button
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                        whileHover={{ scale: 1.05, backgroundColor: "#3b82f6" }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        View Details
-                      </motion.button>
-                      <motion.button
-                        className="flex-1 border border-gray-700 bg-gray-700/50 text-gray-300 px-4 py-2 rounded-lg text-sm font-medium"
-                        whileHover={{ scale: 1.05, backgroundColor: "rgba(55, 65, 81, 0.7)" }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        Register Now
-                      </motion.button>
+                      <Link href={`/events/${hackathon.title.toLowerCase().replace(/ /g, '-')}`} className="flex-1">
+                        <motion.button
+                          className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                          whileHover={{ scale: 1.05, backgroundColor: "#3b82f6" }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          View Details
+                        </motion.button>
+                      </Link>
+                      <Link href={`/events/${hackathon.title.toLowerCase().replace(/ /g, '-')}/register`} className="flex-1">
+                        <motion.button
+                          className="w-full border border-gray-700 bg-gray-700/50 text-gray-300 px-4 py-2 rounded-lg text-sm font-medium"
+                          whileHover={{ scale: 1.05, backgroundColor: "rgba(55, 65, 81, 0.7)" }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Register Now
+                        </motion.button>
+                      </Link>
                     </div>
                   </div>
                 </motion.div>
@@ -787,14 +798,16 @@ export default function Hero() {
             </div>
             
             <div className="mt-10 text-center">
-              <motion.button
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium inline-flex items-center gap-2"
-                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(79, 70, 229, 0.6)" }}
-                whileTap={{ scale: 0.95 }}
-              >
-                View All Hackathons
-                <ChevronRight size={18} />
-              </motion.button>
+              <Link href="/events">
+                <motion.button
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium inline-flex items-center gap-2"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(79, 70, 229, 0.6)" }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  View All Hackathons
+                  <ChevronRight size={18} />
+                </motion.button>
+              </Link>
             </div>
           </div>
         </section>
