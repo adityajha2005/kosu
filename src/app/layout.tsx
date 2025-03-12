@@ -32,13 +32,11 @@ export default function RootLayout({
       <Header/>
         {children}
       </body>
-      <div className="container mx-auto py-8">
-
- <h1 className="text-2xl font-bold mb-6">AI Agent Dashboard</h1>
+   
 
 <AgentInteract />
 
-</div>
+
     </html>
   );
 }

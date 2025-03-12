@@ -1,33 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AgentInteract() {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [threadId, setThreadId] = useState('');
+  const [error, setError] = useState(null);
+
+  // Generate a thread ID when component mounts
+  useEffect(() => {
+    // Generate a unique thread ID for this session
+    const storedThreadId = localStorage.getItem('agent_thread_id');
+    if (storedThreadId) {
+      setThreadId(storedThreadId);
+    } else {
+      const newThreadId = `thread-${Date.now()}-${Math.random().toString(36).substring(2)}`;
+      setThreadId(newThreadId);
+      localStorage.setItem('agent_thread_id', newThreadId);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+
     try {
       const res = await fetch('/api/agent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Thread-ID': threadId,
         },
         body: JSON.stringify({ query }),
       });
+      
       const data = await res.json();
+      
       if (res.ok) {
         setResponse(data.response);
+        
+        // Update thread ID if returned from server
+        if (data.threadId && data.threadId !== threadId) {
+          setThreadId(data.threadId);
+          localStorage.setItem('agent_thread_id', data.threadId);
+        }
       } else {
-        setResponse(`Error: ${data.error}`);
+        // Handle specific error types
+        if (data.error?.includes('Thread ID')) {
+          setError({
+            type: 'thread',
+            message: 'Thread ID configuration error. Trying to regenerate thread ID...'
+          });
+          
+          // Attempt to regenerate thread ID
+          const newThreadId = `thread-${Date.now()}-${Math.random().toString(36).substring(2)}`;
+          setThreadId(newThreadId);
+          localStorage.setItem('agent_thread_id', newThreadId);
+        } else {
+          setError({
+            type: 'general',
+            message: data.error || 'An unexpected error occurred'
+          });
+        }
       }
     } catch (error) {
-      setResponse('Failed to communicate with the agent.');
       console.error(error);
+      setError({
+        type: 'network',
+        message: 'Failed to communicate with the agent. Please check your network connection.'
+      });
     } finally {
       setLoading(false);
     }
@@ -93,6 +138,24 @@ export default function AgentInteract() {
 
             <h2 className="text-2xl font-bold mb-4 text-blue-400">AI Agent Assistant</h2>
             <p className="text-gray-400 mb-4">Ask questions or request assistance from your AI agent.</p>
+            
+            {/* Thread ID debug indicator (can be removed in production) */}
+            <div className="text-xs text-gray-500 mb-4">
+              Thread ID: {threadId.substring(0, 8)}...
+            </div>
+            
+            {error && (
+              <div className="mb-4 p-4 rounded-lg border bg-red-900/50 border-red-700 text-red-200">
+                <h3 className="font-bold mb-1 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  Error
+                </h3>
+                <p>{error.message}</p>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="mb-4">
               <div className="mb-4">
                 <label className="block text-gray-300 mb-2 font-medium">Your Query:</label>
