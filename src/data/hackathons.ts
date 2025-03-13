@@ -1,7 +1,7 @@
 import { image } from "framer-motion/client";
 
 // Mock data for hackathons - this would typically come from an API or database
-export const hackathons = [
+export const hacks = [
   {
     id: 1,
     slug: "aptos-defi-hackathon",

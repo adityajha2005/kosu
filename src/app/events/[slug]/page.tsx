@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Calendar, MapPin, Clock, Users, Trophy, ExternalLink, AlertCircle, X, ArrowLeft, CheckCircle } from "lucide-react";
-import { hackathons } from "../../../data/hackathons";
+import { hacks } from "../../../data/hackathons";
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -17,7 +17,7 @@ export default function EventDetailPage() {
   const [isRegistered, setIsRegistered] = useState(false);
 
   // Find the hackathon by slug
-  const hackathon = hackathons.find(h => h.slug === slug);
+  const hackathon = hacks.find(h => h.slug === slug);
 
   // Check if user wallet is connected and if user is registered
   useEffect(() => {

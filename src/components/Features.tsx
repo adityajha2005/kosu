@@ -1,6 +1,7 @@
 "use client";
-// FeaturesPage.tsx
+// FeaturesPage.tsx with Modal Implementation
 import React, { useState } from 'react';
+
 
 interface Feature {
   id: string;
@@ -10,6 +11,9 @@ interface Feature {
   iconName: string;
   isNew: boolean;
   comingSoon: boolean;
+  detailedDescription?: string;
+  benefits?: string[];
+  useCase?: string;
 }
 
 interface FeaturesPageProps {
@@ -19,8 +23,10 @@ interface FeaturesPageProps {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
   const [activeTab, setActiveTab] = useState<string>('All');
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
   
-  // Feature data
+  // Feature data with added detailed descriptions
   const features: Feature[] = [
     {
       id: '1',
@@ -29,7 +35,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'Automation',
       iconName: 'rocket',
       isNew: false,
-      comingSoon: false
+      comingSoon: false,
+      detailedDescription: 'Our One-Click Event Setup streamlines the entire process of creating a hackathon event. With an intuitive drag-and-drop interface, organizers can quickly design landing pages, registration forms, and schedules without any coding knowledge. The platform offers customizable templates tailored to different hackathon types, from corporate innovation challenges to educational coding competitions.',
+      benefits: [
+        'Reduces setup time by 75% compared to traditional methods',
+        'Includes SEO optimization for better event discoverability',
+        'Supports multiple payment gateway integrations for paid events',
+        'Automatically generates responsive designs for all devices'
+      ],
+      useCase: 'TechUniversity used our One-Click Setup to launch their annual hackathon in just 2 hours instead of the 2 weeks it took them previously. The streamlined process allowed them to focus on participant engagement rather than technical logistics.'
     },
     {
       id: '2',
@@ -38,7 +52,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'AI',
       iconName: 'users',
       isNew: false,
-      comingSoon: false
+      comingSoon: false,
+      detailedDescription: 'The AI-Powered Team Matching system uses machine learning algorithms trained on thousands of successful hackathon teams to create optimal groupings. It analyzes participants technical skills, personality traits, past project experiences, learning goals, and even time zone compatibility to suggest ideal team compositions. Participants can set preferences for team size, required skills, and working styles.',
+      benefits: [
+        'Reduces team conflicts by 63% through personality compatibility analysis',
+        'Ensures balanced skill distribution across all participating teams',
+        'Integrates with LinkedIn and GitHub profiles for accurate skill assessment',
+        'Provides diversity and inclusion metrics to ensure balanced representation'
+      ],
+      useCase: 'InnovateX Corporation implemented our team matching for their 500-person hackathon and saw a 47% increase in completed projects compared to their previous manual team formation process.'
     },
     {
       id: '3',
@@ -47,7 +69,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'Blockchain',
       iconName: 'award',
       isNew: true,
-      comingSoon: false
+      comingSoon: false,
+      detailedDescription: 'Our NFT-Based Event Swags system transforms traditional hackathon memorabilia into valuable digital assets. Each NFT is uniquely designed for your event with different tiers for participants, finalists, winners, and mentors. These digital collectibles serve as verifiable proof of participation and achievement that participants can showcase in their digital portfolios. The platform supports multiple blockchain networks with minimal gas fees.',
+      benefits: [
+        'Creates lasting value beyond physical swag with tradable digital assets',
+        'Provides verifiable credentials that participants can add to professional profiles',
+        'Reduces environmental impact by eliminating shipping and physical production',
+        'Enables dynamic NFTs that evolve based on continued participation in future events'
+      ],
+      useCase: 'GreenTech Hackathon replaced their physical t-shirts and stickers with custom NFTs, saving $12,000 in production and shipping costs while providing participants with digital assets that appreciated 300% in value within 6 months.'
     },
     {
       id: '4',
@@ -56,7 +86,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'AI',
       iconName: 'lightbulb',
       isNew: false,
-      comingSoon: false
+      comingSoon: false,
+      detailedDescription: 'The Dynamic Problem Statements feature uses natural language processing and trend analysis to help sponsors create compelling, relevant challenges. By analyzing current industry pain points, emerging technologies, and past successful hackathon projects, the system suggests optimized problem statements that balance creativity, feasibility, and business impact. Sponsors can set parameters including technical complexity, required outputs, and evaluation criteria.',
+      benefits: [
+        'Increases solution quality by 43% through well-structured problem framing',
+        'Helps sponsors align hackathon challenges with actual business needs',
+        'Suggests optimal scope and constraints to make challenges hackable in the timeframe',
+        'Recommends technologies and resources participants might need'
+      ],
+      useCase: 'FinTech Alliance used our Dynamic Problem Statements to generate 12 unique challenges for their open banking hackathon, resulting in 8 prototypes that advanced to their accelerator program.'
     },
     {
       id: '5',
@@ -65,7 +103,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'AI',
       iconName: 'code',
       isNew: true,
-      comingSoon: false
+      comingSoon: false,
+      detailedDescription: 'Our Automated Code Evaluation system performs comprehensive analysis of submitted projects to provide objective metrics for judges and valuable feedback for participants. The engine checks code quality, test coverage, security vulnerabilities, performance optimization, and architectural decisions. It automatically deploys and tests solutions in a sandbox environment to verify functionality and scalability. This creates a baseline technical assessment before human judges evaluate innovation and business potential.',
+      benefits: [
+        'Saves judges 65% of evaluation time through automated technical assessment',
+        'Provides consistent, objective evaluation across all submissions',
+        'Gives participants immediate feedback to improve their projects even during the hackathon',
+        'Detects code plagiarism and ensures original work is properly recognized'
+      ],
+      useCase: 'CyberSec Hackathon utilized our evaluation system to automatically test 178 security solution submissions against a standardized vulnerability dataset, allowing judges to focus only on the top 20 performing solutions.'
     },
     {
       id: '6',
@@ -74,7 +120,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'Hiring',
       iconName: 'briefcase',
       isNew: false,
-      comingSoon: false
+      comingSoon: false,
+      detailedDescription: 'Smart Talent Acquisition transforms hackathons into efficient recruitment channels by providing sponsors and companies with detailed participant insights. The system combines OCEAN personality profiling (Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism) with technical skill assessment and real-time project contributions to identify candidates that match specific team needs. Recruiters can set filters for required skills, personality traits that complement existing teams, and performance metrics to find ideal matches.',
+      benefits: [
+        'Reduces hiring costs by 52% compared to traditional recruitment channels',
+        'Increases new hire retention by matching company culture with personality profiles',
+        'Provides video highlights of candidates solving problems in real-time',
+        'Offers behavioral analysis beyond what interviews can reveal'
+      ],
+      useCase: 'TechGiant recruited 32 engineers from our platform in one quarter, reporting that these hires reached productivity 40% faster than candidates from traditional sources due to better team fit.'
     },
     {
       id: '7',
@@ -83,7 +137,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'Engagement',
       iconName: 'activity',
       isNew: false,
-      comingSoon: false
+      comingSoon: false,
+      detailedDescription: 'The Real-time Engagement Dashboard provides organizers with comprehensive analytics throughout the hackathon lifecycle. The interactive visualization tool tracks registration trends, team formation progress, mentor interactions, workshop attendance, code commits, and submission status. The system identifies potential bottlenecks or engagement drops and suggests interventions based on successful patterns from previous events. A public-facing version can be displayed to create excitement around hackathon activity.',
+      benefits: [
+        'Enables proactive intervention when teams are struggling or disengaging',
+        'Provides sponsors with transparent ROI metrics throughout the event',
+        'Gamifies participation with real-time leaderboards and achievement tracking',
+        'Generates post-event reports with actionable insights for future improvements'
+      ],
+      useCase: 'Global Hack used our dashboard to monitor 5,000 participants across 12 time zones, identifying and resolving technical issues within minutes and achieving 94% participant satisfaction.'
     },
     {
       id: '8',
@@ -92,7 +154,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'Blockchain',
       iconName: 'gift',
       isNew: false,
-      comingSoon: false
+      comingSoon: false,
+      detailedDescription: 'The Token-Based Incentives system creates a gamified economy within your hackathon. Participants earn tokens for valuable contributions including helping others, completing challenges, providing quality feedback, attending workshops, and reaching project milestones. The earned tokens can be redeemed for rewards ranging from premium API access to mentorship sessions with industry experts. All transactions are recorded on-chain, creating transparent incentive structures.',
+      benefits: [
+        'Increases participant engagement by 78% through continuous reinforcement',
+        'Creates more collaborative atmosphere compared to winner-takes-all prizes',
+        'Allows sponsors to direct participant effort toward specific challenges',
+        'Provides ongoing incentives throughout the event, not just final judging'
+      ],
+      useCase: 'EdTech Hackathon implemented token rewards for peer mentoring, resulting in 340% more cross-team collaboration than in previous years and higher quality solutions overall.'
     },
     {
       id: '9',
@@ -101,7 +171,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'AI',
       iconName: 'map',
       isNew: false,
-      comingSoon: true
+      comingSoon: true,
+      detailedDescription: 'Coming Soon: Personalized Learning Paths will transform hackathons into powerful upskilling experiences. The AI system assesses each participant`s current skills through pre-event surveys and integration with learning platforms. Based on their hackathon project goals and skill gaps, it creates customized learning recommendations including workshops to attend, documentation to review, and practice exercises. Progress tracking helps participants see their growth throughout the event.',
+      benefits: [
+        'Transforms hackathons from competitions into educational experiences',
+        'Provides valuable skills development even for non-winning participants',
+        'Helps sponsors showcase their technologies through guided learning',
+        'Creates long-term engagement through post-event learning continuations'
+      ],
+      useCase: 'This feature is currently in development with beta testing scheduled to begin next quarter. Early access can be requested through your account manager.'
     },
     {
       id: '10',
@@ -110,7 +188,15 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
       category: 'Blockchain',
       iconName: 'check-square',
       isNew: false,
-      comingSoon: true
+      comingSoon: true,
+      detailedDescription: 'Coming Soon: Our Decentralized Voting System will eliminate bias and ensure complete transparency in the hackathon judging process. All votes are recorded on a public blockchain with judges identities optionally anonymized. The system uses a quadratic voting mechanism where judges allocate points across multiple evaluation criteria. Smart contracts automatically tally results and can integrate with token distribution for prize awards. The entire voting process is auditable by all participants.',
+      benefits: [
+        'Eliminates perception of favoritism through transparent voting records',
+        'Prevents vote manipulation through decentralized verification',
+        'Allows weighted criteria importance based on sponsor priorities',
+        'Supports multiple voting formats including public choice and expert panels'
+      ],
+      useCase: 'This feature is in final development with security audits underway. Join our waiting list to be among the first organizers to implement this revolutionary judging system.'
     }
   ];
   
@@ -118,6 +204,18 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
   const filteredFeatures = activeTab === 'All' 
     ? features 
     : features.filter(feature => feature.category === activeTab);
+  
+  // Open modal with selected feature
+  const openFeatureModal = (feature: Feature) => {
+    setSelectedFeature(feature);
+    setModalOpen(true);
+  };
+  
+  // Close modal
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedFeature(null);
+  };
   
   // Function to render the appropriate icon
   const renderIcon = (iconName: string) => {
@@ -200,14 +298,7 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
           <p className="text-xl text-gray-300 mt-4 max-w-2xl">
             Our AI-powered platform combined with blockchain technology makes organizing, participating, and hiring through hackathons more efficient, engaging, and fair.
           </p>
-          <div className="mt-8">
-            <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-indigo-700 transition duration-300 shadow-lg">
-              Get Started Free
-            </button>
-            <button className="ml-4 px-6 py-3 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-600 transition duration-300">
-              Schedule Demo
-            </button>
-          </div>
+         
         </div>
       </div>
       
@@ -265,7 +356,10 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
                 <span className="inline-block px-3 py-1 text-xs rounded-full bg-gray-700 text-gray-300">
                   {feature.category}
                 </span>
-                <button className="ml-auto text-purple-400 hover:text-purple-300 text-sm font-medium transition duration-300 flex items-center">
+                <button 
+                  onClick={() => openFeatureModal(feature)}
+                  className="ml-auto text-purple-400 hover:text-purple-300 text-sm font-medium transition duration-300 flex items-center"
+                >
                   Learn more
                   <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -277,47 +371,148 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
         </div>
       </div>
       
+      {/* Feature Modal */}
+      {modalOpen && selectedFeature && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-xl">
+            <div className="p-6 relative">
+              <button 
+                onClick={closeModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              
+              <div className="flex items-center">
+                {renderIcon(selectedFeature.iconName)}
+                <div className="ml-4">
+                  <h3 className="text-2xl font-bold text-white">{selectedFeature.title}</h3>
+                  <div className="flex mt-1">
+                    <span className="inline-block px-3 py-1 text-xs rounded-full bg-gray-700 text-gray-300">
+                      {selectedFeature.category}
+                    </span>
+                    {selectedFeature.isNew && (
+                      <span className="inline-block px-2 py-1 text-xs rounded-full bg-green-900 text-green-300 ml-2">
+                        New
+                      </span>
+                    )}
+                    {selectedFeature.comingSoon && (
+                      <span className="inline-block px-2 py-1 text-xs rounded-full bg-blue-900 text-blue-300 ml-2">
+                        Coming Soon
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 space-y-6">
+                <div>
+                  <h4 className="text-xl font-semibold text-white">Overview</h4>
+                  <p className="text-gray-300 mt-2">{selectedFeature.detailedDescription}</p>
+                </div>
+                
+                {selectedFeature.benefits && selectedFeature.benefits.length > 0 && (
+                  <div>
+                    <h4 className="text-xl font-semibold text-white">Key Benefits</h4>
+                    <ul className="mt-2 space-y-2">
+                      {selectedFeature.benefits.map((benefit, index) => (
+                        <li key={index} className="flex items-start">
+                          <svg className="h-5 w-5 text-purple-400 mr-2 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-gray-300">{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {selectedFeature.useCase && (
+                  <div>
+                    <h4 className="text-xl font-semibold text-white">Success Story</h4>
+                    <div className="mt-2 bg-gray-900 p-4 rounded-lg border border-gray-700">
+                      <p className="text-gray-300 italic">{selectedFeature.useCase}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+             
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Feature Highlight Section */}
-      <div className="bg-gray-800 border-t border-b border-gray-700 py-16 mt-16">
+      <div className="bg-gray-800 border-t border-b border-gray-700 py-16">
         <div className="container mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center">
-            <div className="lg:w-1/2 lg:pr-12 mb-10 lg:mb-0">
-              <h2 className="text-3xl font-bold text-white">AI-Powered <span className="text-purple-400">Team Matching</span></h2>
-              <p className="text-gray-400 mt-4">
-                Our advanced algorithms analyze participants skills, experience, location, and interests to create the most effective teams for your hackathon. This ensures balanced skill distribution and maximizes creative potential.
+            <div className="lg:w-1/2 mb-8 lg:mb-0">
+              <h2 className="text-3xl font-bold text-white">Powered by AI & Blockchain</h2>
+              <p className="text-gray-300 mt-4">
+                Our platform leverages cutting-edge AI to match participants with the perfect projects and teams, while blockchain technology ensures transparent judging and secure credential verification.
               </p>
               <ul className="mt-6 space-y-3">
                 <li className="flex items-start">
                   <svg className="h-5 w-5 text-purple-400 mr-2 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-300">Personality trait matching using OCEAN model</span>
+                  <span className="text-gray-300">Smart matching algorithms for team formation</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="h-5 w-5 text-purple-400 mr-2 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-300">Skill gap identification and complementary pairing</span>
+                  <span className="text-gray-300">Immutable judging records on blockchain</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="h-5 w-5 text-purple-400 mr-2 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-300">Historical performance analysis for optimal grouping</span>
+                  <span className="text-gray-300">Automated credential verification</span>
                 </li>
               </ul>
-              <button className="mt-8 px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition duration-300">
-                See How It Works
+              <button className="mt-8 px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition duration-300 flex items-center">
+                Explore Technology
+                <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
               </button>
             </div>
-            <div className="lg:w-1/2 bg-gray-900 rounded-xl overflow-hidden border border-gray-700 shadow-xl">
-              <div className="aspect-w-16 aspect-h-9 bg-gray-900 flex items-center justify-center p-8">
-                <div className="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center">
-                  <img 
-                    src="/visualization.png" 
-                    alt="Visualization" 
-                    className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-105" 
-                  />
+            <div className="lg:w-1/2 lg:pl-16">
+              <div className="bg-gray-900 rounded-xl p-6 border border-gray-700 shadow-xl">
+                <h3 className="text-xl font-bold text-white mb-4">How It Works</h3>
+                <div className="space-y-6">
+                  <div className="flex">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-900 flex items-center justify-center text-white font-bold">1</div>
+                    <div className="ml-4">
+                      <h4 className="text-lg font-semibold text-white">Register & Create Profile</h4>
+                      <p className="text-gray-400 mt-1">Create your profile with skills, interests, and experience level</p>
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-900 flex items-center justify-center text-white font-bold">2</div>
+                    <div className="ml-4">
+                      <h4 className="text-lg font-semibold text-white">AI-Powered Matching</h4>
+                      <p className="text-gray-400 mt-1">Our AI suggests optimal teams and projects based on your profile</p>
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-900 flex items-center justify-center text-white font-bold">3</div>
+                    <div className="ml-4">
+                      <h4 className="text-lg font-semibold text-white">Transparent Judging</h4>
+                      <p className="text-gray-400 mt-1">Blockchain ensures fair, transparent evaluation of projects</p>
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-900 flex items-center justify-center text-white font-bold">4</div>
+                    <div className="ml-4">
+                      <h4 className="text-lg font-semibold text-white">Verifiable Achievements</h4>
+                      <p className="text-gray-400 mt-1">Earn blockchain-verified credentials for your portfolio</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -325,67 +520,78 @@ const FeaturesPage: React.FC<FeaturesPageProps> = ({ eventId }) => {
         </div>
       </div>
       
-      {/* Testimonial */}
+      {/* Testimonials */}
       <div className="container mx-auto px-6 py-16">
-        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 border border-gray-700 shadow-lg">
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-6">
-              <svg className="h-8 w-8 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
+        <div className="flex flex-col items-center mb-12">
+          <h2 className="text-3xl font-bold text-white">Success Stories</h2>
+          <p className="text-gray-400 mt-2 text-center max-w-xl">
+            Hear from hackathon organizers, participants, and recruiters who have transformed their experience with our platform
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <div className="flex items-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-purple-700 flex items-center justify-center text-white font-bold text-xl">JD</div>
+              <div className="ml-4">
+                <h4 className="text-lg font-semibold text-white">Jane Doe</h4>
+                <p className="text-gray-400 text-sm">Hackathon Organizer</p>
+              </div>
             </div>
-            
-            <blockquote className="text-xl text-gray-300 italic max-w-4xl">
-            {/*  eslint-disable-next-line react/no-unescaped-entities */}
-              "Implementing this platform for our university hackathon increased participant satisfaction by 78% and resulted in 12 successful hiring placements. The AI team matching and blockchain-based rewards created an engaging experience unlike any other event we've hosted."
-            </blockquote>
-            <div className="mt-6">
-              <h4 className="text-white font-medium">Sarah Johnson</h4>
-              <p className="text-gray-500 text-sm">Director of Innovation, TechUniversity</p>
+            <p className="text-gray-300 italic">
+              "The AI-powered matching system saved us countless hours of manual team formation. We saw a 40% increase in participant satisfaction and higher quality projects."
+            </p>
+          </div>
+          
+          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <div className="flex items-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-indigo-700 flex items-center justify-center text-white font-bold text-xl">MS</div>
+              <div className="ml-4">
+                <h4 className="text-lg font-semibold text-white">Mike Smith</h4>
+                <p className="text-gray-400 text-sm">Student Participant</p>
+              </div>
             </div>
+            <p className="text-gray-300 italic">
+              "As a first-time hackathon participant, I was nervous about finding a team. The platform matched me with the perfect teammates, and we ended up winning second place!"
+            </p>
+          </div>
+          
+          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <div className="flex items-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-xl">AR</div>
+              <div className="ml-4">
+                <h4 className="text-lg font-semibold text-white">Alice Rodriguez</h4>
+                <p className="text-gray-400 text-sm">Tech Recruiter</p>
+              </div>
+            </div>
+            <p className="text-gray-300 italic">
+              "The verified credentials make our hiring process so much easier. We can quickly identify top talent based on their hackathon performance and contributions."
+            </p>
           </div>
         </div>
       </div>
       
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-purple-900 to-indigo-900 py-16">
-        <div className="container mx-auto px-6">
+      <div className="bg-gradient-to-r from-purple-900 to-indigo-900 border-t border-purple-800">
+        <div className="container mx-auto px-6 py-16">
           <div className="flex flex-col lg:flex-row items-center justify-between">
-            <div className="mb-8 lg:mb-0">
-              <h2 className="text-3xl font-bold text-white">Ready to transform your hackathon?</h2>
-              <p className="text-purple-200 mt-2">
-                Join thousands of organizers revolutionizing the hackathon experience.
+            <div className="lg:w-2/3 mb-8 lg:mb-0">
+              <h2 className="text-3xl font-bold text-white">Ready to Transform Your Hackathon Experience?</h2>
+              <p className="text-gray-200 mt-4 max-w-2xl">
+                Join thousands of organizers, participants, and recruiters who are already experiencing the future of hackathons.
               </p>
             </div>
-            <div className="flex gap-4">
-              <button className="px-6 py-3 bg-white text-purple-900 font-medium rounded-lg hover:bg-gray-100 transition duration-300 shadow-lg">
-                Start Free Trial
-              </button>
-              <button className="px-6 py-3 bg-transparent text-white font-medium rounded-lg border border-white hover:bg-white/10 transition duration-300">
-                Schedule Demo
-              </button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              
             </div>
           </div>
         </div>
       </div>
       
-      {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 py-8">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-500 mb-4 md:mb-0">
-              © 2025 HackPro Platform • Powered by AI and Blockchain
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition duration-300">Terms</a>
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition duration-300">Privacy</a>
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition duration-300">Support</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 };
 
-export default FeaturesPage;
+
+export default FeaturesPage
