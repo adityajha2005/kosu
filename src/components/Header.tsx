@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import Link from "next/link";
-// The window.aptos interface is already defined in aptosService.ts
+import { connectWalletAndSaveUser, disconnectWallet, getCurrentWalletAddress } from "@/lib/walletUtils";
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -16,11 +16,9 @@ function Header() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        if (window.aptos) {
-          const storedAddress = localStorage.getItem('userWalletAddress');
-          if (storedAddress) {
-            setUserAddress(storedAddress);
-          }
+        const storedAddress = getCurrentWalletAddress();
+        if (storedAddress) {
+          setUserAddress(storedAddress);
         }
       } catch (error) {
         console.error("Error checking connection:", error);
@@ -32,22 +30,14 @@ function Header() {
 
   const handlePetraWalletConnection = async () => {
     try {
-      if (!window.aptos) {
-        alert("Petra Wallet not detected.");
+      const result = await connectWalletAndSaveUser();
+      
+      if (!result.success) {
+        alert(result.error || "Failed to connect wallet");
         return;
       }
-
-      const response = await window.aptos.connect();
-      const { address } = response;
-
-      if (!address) {
-        throw new Error("No address found in connection response.");
-      }
-
-      //storing address in local storage
-      localStorage.setItem('userWalletAddress', address);
-      setUserAddress(address);
       
+      setUserAddress(result.address || null);
       alert("Petra Wallet Connected Successfully!");
       router.push("/dashboard");
     } catch (error) {
@@ -58,10 +48,13 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      if (window.aptos) {
-        await window.aptos.disconnect();
+      const result = await disconnectWallet();
+      
+      if (!result.success) {
+        alert(result.error || "Failed to disconnect wallet");
+        return;
       }
-      localStorage.removeItem('userWalletAddress');
+      
       setUserAddress(null);
       setDropdownOpen(false);
       router.push("/");

@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Suspense } from "react";
+import { useEffect, useState } from 'react';
 import { JobMatch } from '../../types/aiAgent';
 import { getAgents, talentScoutAgent, Agent, runAgent, pauseAgent, activateAgent, trainAgent } from '../../services/aiAgentService';
 import AgentInteraction from '../../components/AgentInteraction';
@@ -8,6 +9,8 @@ import CreateAgentModal from '../../components/CreateAgentModal';
 import ResumeUploader from '../../components/ResumeUploader';
 import RegisteredHackathons from '../../components/RegisteredHackathons';
 import NFTMinter from '../../components/NFTMinter';
+import UserProfileForm from '../../components/UserProfileForm';
+import UserProfileCard from '../../components/UserProfileCard';
 
 // Let's update the ResumeUploader component to accept an onError prop
 interface ExtendedResumeUploaderProps {
@@ -27,8 +30,8 @@ interface ExtendedAgentInteractionProps {
 }
 
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'agents' | 'matches' | 'profile'>('dashboard');
   const [address, setAddress] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'agents' | 'matches'>('dashboard');
   const [isAssessmentStarted, setIsAssessmentStarted] = useState(false);
   const [assessmentProgress, setAssessmentProgress] = useState(0);
   const [aiAgents, setAiAgents] = useState<Agent[]>(getAgents());
@@ -39,6 +42,7 @@ export default function Dashboard() {
   const [showNotification, setShowNotification] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [notificationMessage, setNotificationMessage] = useState<string>('Resume analysis complete! View your job matches.');
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
   
   const [jobMatches, setJobMatches] = useState<JobMatch[]>([
     {
@@ -71,6 +75,11 @@ export default function Dashboard() {
   ]);
   
   const router = useRouter();
+
+  // Remove the URL parameter effect and update tab navigation functions
+  const navigateToTab = (tab: 'dashboard' | 'agents' | 'matches' | 'profile') => {
+    setActiveTab(tab);
+  };
 
   useEffect(() => {
     // Check if user is connected
@@ -187,6 +196,19 @@ export default function Dashboard() {
     console.log('Resume analysis complete:', { matches: sortedMatches, skills });
   };
 
+  const handleProfileUpdate = () => {
+    setIsProfileComplete(true);
+    setNotificationMessage('Profile updated successfully!');
+    // setShowNotification(true);
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 3000);
+  };
+
+  const navigateToProfileTab = () => {
+    setActiveTab('profile');
+  };
+
   if (!address) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
@@ -196,6 +218,7 @@ export default function Dashboard() {
   }
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <div className="min-h-screen bg-gray-900 text-white">
    
       <div className="container mx-auto px-4 py-8">
@@ -253,21 +276,27 @@ export default function Dashboard() {
             <p className="text-gray-400 mt-1">Manage your AI agents and view job matches</p>
           </div>
           <div className="mt-4 md:mt-0">
-            <div className="bg-gray-800 rounded-lg p-1 flex">
+            <div className="bg-gray-800 rounded-lg p-1 flex flex-wrap">
               <button 
-                onClick={() => setActiveTab('dashboard')}
+                onClick={() => navigateToTab('dashboard')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}
               >
                 Dashboard
               </button>
               <button 
-                onClick={() => setActiveTab('agents')}
+                onClick={() => navigateToTab('profile')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'profile' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}
+              >
+                Profile
+              </button>
+              <button 
+                onClick={() => navigateToTab('agents')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'agents' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}
               >
                 AI Agents
               </button>
               <button 
-                onClick={() => setActiveTab('matches')}
+                onClick={() => navigateToTab('matches')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'matches' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}
               >
                 Job Matches
@@ -275,6 +304,16 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Profile Tab */}
+        {activeTab === 'profile' && address && (
+          <div className="max-w-3xl mx-auto">
+            <UserProfileForm 
+              walletAddress={address} 
+              onProfileUpdate={handleProfileUpdate}
+            />
+          </div>
+        )}
 
         {activeTab === 'dashboard' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -307,7 +346,7 @@ export default function Dashboard() {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold text-blue-400">Top Job Matches</h2>
                   <button 
-                    onClick={() => setActiveTab('matches')}
+                    onClick={() => navigateToTab('matches')}
                     className="text-blue-400 hover:text-blue-300 text-sm"
                   >
                     View All
@@ -337,6 +376,14 @@ export default function Dashboard() {
             </div>
             
             <div className="space-y-6">
+              {/* User Profile Card */}
+              {address && (
+                <UserProfileCard 
+                  walletAddress={address} 
+                  onEditProfile={navigateToProfileTab}
+                />
+              )}
+              
               {/* New Registered Hackathons Component */}
               <RegisteredHackathons userAddress={address} />
               
@@ -361,7 +408,7 @@ export default function Dashboard() {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold text-blue-400">Your AI Agents</h2>
                   <button 
-                    onClick={() => setActiveTab('agents')}
+                    onClick={() => navigateToTab('agents')}
                     className="text-blue-400 hover:text-blue-300 text-sm"
                   >
                     View All
@@ -399,7 +446,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Keep the rest of the existing tabs */}
         {activeTab === 'agents' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -557,17 +603,7 @@ export default function Dashboard() {
           onAgentCreated={handleAgentCreated}
         />
       )}
-      
-      {selectedAgent && (
-        <AgentInteraction 
-          agent={selectedAgent}
-          onAgentUpdate={handleAgentUpdate}
-          onClose={() => setSelectedAgent(null)}
-          onPauseAgent={handlePauseAgent}
-          onActivateAgent={handleActivateAgent}
-          onTrainAgent={handleTrainAgent}
-        />
-      )}
     </div>
+    </Suspense>
   );
 }
