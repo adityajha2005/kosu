@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, ExternalLink, ChevronRight, Award } from 'lucide-react';
-import { hackathons } from '../data/hackathons';
+import { hacks } from '../data/hackathons';
 
 interface RegisteredHackathonsProps {
   userAddress: string | null;
@@ -11,7 +11,7 @@ interface RegisteredHackathonsProps {
 
 export default function RegisteredHackathons({ userAddress }: RegisteredHackathonsProps) {
   const [registeredEvents, setRegisteredEvents] = useState<string[]>([]);
-  const [userHackathons, setUserHackathons] = useState<typeof hackathons>([]);
+  const [userHackathons, setUserHackathons] = useState<typeof hacks>([]);
   
   // Fetch registered events from localStorage
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function RegisteredHackathons({ userAddress }: RegisteredHackatho
   // Filter hackathons to show only registered ones
   useEffect(() => {
     if (registeredEvents.length > 0) {
-      const userRegisteredHackathons = hackathons.filter(hackathon => 
+      const userRegisteredHackathons = hacks.filter(hackathon => 
         registeredEvents.includes(hackathon.slug)
       );
       setUserHackathons(userRegisteredHackathons);

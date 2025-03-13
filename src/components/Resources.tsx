@@ -1,12 +1,13 @@
 // ResourcesPage.tsx
 "use client"
 import React, { useState, useEffect } from 'react';
+import SuggestResourceModal from './SuggestResource';
 
 interface Resource {
   id: string;
   title: string;
   description: string;
-  category: 'Documentation' | 'API' | 'Tools' | 'Templates' | 'Learning';
+  category: string
   url: string;
   provider: string;
   featured: boolean;
@@ -24,6 +25,7 @@ const ResourcesPage: React.FC<ResourcesPageProps> = ({ eventId, userId }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [isModalOpen, setModalOpen] = useState(false);
   
   // Simulated data - in a real app this would come from an API
   useEffect(() => {
@@ -32,81 +34,81 @@ const ResourcesPage: React.FC<ResourcesPageProps> = ({ eventId, userId }) => {
       const mockResources: Resource[] = [
         {
           id: '1',
-          title: 'Blockchain Development Guide',
-          description: 'Comprehensive guide for building on Ethereum and Solana',
-          category: 'Documentation',
-          url: 'https://blockchain-guide.io',
-          provider: 'Web3 Foundation',
+          title: 'TensorFlow: Comprehensive AI Development Framework',
+          description: 'An open-source platform developed by Google for building and deploying machine learning models. TensorFlow supports various tasks, including deep learning and neural network training.',
+          category: 'Framework',
+          url: 'https://www.tensorflow.org/',
+          provider: 'Google',
           featured: true,
           popularity: 95
         },
         {
           id: '2',
-          title: 'AI Model Integration API',
-          description: 'Easy-to-use API for integrating machine learning models',
-          category: 'API',
-          url: 'https://ai-api.dev',
-          provider: 'TensorFlow',
+          title: 'Ethereum: Decentralized Platform for Smart Contracts',
+          description: 'A blockchain-based platform that enables developers to build and deploy smart contracts and decentralized applications (dApps).',
+          category: 'Blockchain Platform',
+          url: 'https://ethereum.org/',
+          provider: 'Ethereum Foundation',
           featured: true,
           popularity: 90
         },
         {
           id: '3',
-          title: 'NFT Creation Toolkit',
-          description: 'Tools for designing and minting NFT badges and rewards',
-          category: 'Tools',
-          url: 'https://nft-toolkit.io',
-          provider: 'OpenSea',
+          title: 'Solana: High-Performance Blockchain for Decentralized Apps',
+          description: 'A fast and secure blockchain platform designed for decentralized applications and crypto-assets at scale.',
+          category: 'Blockchain Platform',
+          url: 'https://solana.com/',
+          provider: 'Solana Labs',
           featured: false,
           popularity: 88
         },
         {
           id: '4',
-          title: 'Hackathon Project Boilerplate',
-          description: 'Ready-to-use templates for quick project setup',
-          category: 'Templates',
-          url: 'https://github.com/hackathon-templates',
-          provider: 'GitHub',
+          title: 'OpenSea: NFT Marketplace',
+          description: 'A leading marketplace for non-fungible tokens (NFTs), allowing users to buy, sell, and discover exclusive digital assets.',
+          category: 'Marketplace',
+          url: 'https://opensea.io/',
+          provider: 'OpenSea',
           featured: false,
-          popularity: 80
+          popularity: 85
         },
         {
           id: '5',
-          title: 'AI-Powered Team Matching Algorithm',
-          description: 'Documentation on how our team matching system works',
-          category: 'Documentation',
-          url: 'https://docs.hackpro.io/team-matching',
-          provider: 'HackPro',
+          title: 'GitHub: Code Hosting Platform',
+          description: 'A platform for version control and collaboration, allowing developers to host and manage code, as well as track and control changes.',
+          category: 'Development Platform',
+          url: 'https://github.com/',
+          provider: 'GitHub',
           featured: true,
           popularity: 92
         },
         {
           id: '6',
-          title: 'Smart Contract Security Course',
-          description: 'Learn how to build secure blockchain applications',
-          category: 'Learning',
-          url: 'https://smartcontract-security.io',
+          title: 'ConsenSys: Blockchain Technology Company',
+          description: 'A blockchain technology company building decentralized applications and developer tools for Ethereum.',
+          category: 'Blockchain Development',
+          url: 'https://consensys.net/',
           provider: 'ConsenSys',
           featured: false,
           popularity: 85
         },
         {
           id: '7',
-          title: 'Code Quality Assessment Tools',
-          description: 'Tools for evaluating code before submission',
-          category: 'Tools',
-          url: 'https://code-quality.dev',
-          provider: 'SonarQube',
+          title: 'SonarQube: Continuous Code Quality',
+          description: 'An open-source platform for continuous inspection of code quality to perform automatic reviews with static analysis of code to detect bugs and code smells.',
+          category: 'Code Quality Tool',
+          url: 'https://www.sonarqube.org/',
+          provider: 'SonarSource',
           featured: false,
           popularity: 75
         },
         {
           id: '8',
-          title: 'Personality Trait Assessment API',
-          description: 'API for OCEAN personality trait analysis',
-          category: 'API',
-          url: 'https://personality-api.io',
-          provider: 'PsychTech',
+          title: 'Hugging Face: Natural Language Processing Tools',
+          description: 'A platform providing tools and models for natural language processing (NLP), including transformers and tokenizers.',
+          category: 'AI Development Platform',
+          url: 'https://huggingface.co/',
+          provider: 'Hugging Face',
           featured: true,
           popularity: 89
         }
@@ -156,6 +158,7 @@ const ResourcesPage: React.FC<ResourcesPageProps> = ({ eventId, userId }) => {
   };
   
   return (
+    
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {/* Header */}
       <div className="bg-gray-800 py-6 border-b border-gray-700">
@@ -278,34 +281,24 @@ const ResourcesPage: React.FC<ResourcesPageProps> = ({ eventId, userId }) => {
       
       {/* Bottom CTA */}
       <div className="container mx-auto px-6 py-12">
-        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 border border-gray-700">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <h3 className="text-2xl font-bold text-white">Missing something?</h3>
-              <p className="text-gray-400 mt-2">Suggest a new resource for the hackathon community</p>
-            </div>
-            <button className="px-6 py-3 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition duration-300">
-              Suggest Resource
-            </button>
+      <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 border border-gray-700">
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="mb-6 md:mb-0">
+            <h3 className="text-2xl font-bold text-white">Missing something?</h3>
+            <p className="text-gray-400 mt-2">Suggest a new resource for the hackathon community</p>
           </div>
+          <button
+            className="px-6 py-3 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition duration-300"
+            onClick={() => setModalOpen(true)}
+          >
+            Suggest Resource
+          </button>
         </div>
       </div>
+      {isModalOpen && <SuggestResourceModal onClose={() => setModalOpen(false)} />}
+    </div>
+     
       
-      {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 py-8">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-500 mb-4 md:mb-0">
-              © 2025 HackPro Platform • Powered by AI and Blockchain
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition duration-300">Terms</a>
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition duration-300">Privacy</a>
-              <a href="#" className="text-gray-400 hover:text-purple-400 transition duration-300">Support</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };
