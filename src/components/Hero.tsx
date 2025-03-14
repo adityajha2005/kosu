@@ -228,6 +228,7 @@ export default function Hero() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
                 >
+                  <Link href="/events/hackregister">
                   <motion.button
                     className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium flex items-center justify-center gap-2 relative overflow-hidden group"
                     whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(79, 70, 229, 0.6)" }}
@@ -240,6 +241,7 @@ export default function Hero() {
                       transition={{ duration: 0.3 }}
                     />
                   </motion.button>
+                  </Link>
                   <Link href="/events">
                     <motion.button
                       className="border border-gray-700 bg-gray-800 text-gray-300 px-8 py-3 rounded-lg font-medium"

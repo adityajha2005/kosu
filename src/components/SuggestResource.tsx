@@ -22,7 +22,7 @@ export default function SuggestResourceModal({ onClose }) {
 
   return (
     <>
-     <div className="fixed inset-0 bg-gradient-to-tr from-blue-900 via-purple-900 to-blue-950 bg-opacity-50 flex justify-center items-center">
+     <div className="fixed inset-0 bg-gradient-to-tr from-gray-800 via-gray-900 to-gray-950 bg-opacity-50 flex justify-center items-center">
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold text-white mb-4">Suggest a Resource</h2>
         <form>
