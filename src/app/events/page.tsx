@@ -3,37 +3,35 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, MapPin, Clock, Users, ExternalLink, AlertCircle, X, Loader2 } from "lucide-react";
-import aptos from "../../../public/aptos.png";
-import move from "../../../public/move.png"
-import web3 from "../../../public/web3game.png"
-import blockchain from "../../../public/blockchain.png"
+import { Calendar, MapPin, Clock, Users, ExternalLink, AlertCircle, X, Loader2, User, AtSign } from "lucide-react";
 
+import aptos from "../../../public/aptos.png";
+
+import move from "../../../public/move.png"
+
+import web3 from "../../../public/web3game.png"
+
+import blockchain from "../../../public/blockchain.png"
 
 // Define TypeScript interfaces
 interface Hackathon {
   id?: string;
-  title: string;
-  description?: string;
-  date?: string;
-  stringDate?: string;
-  location?: string;
-  mode?: string;
-  time?: string;
-  participants?: number;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  registrationDeadline: string;
+  location: string;
+  minTeamSize: number;
+  maxTeamSize: number;
+  organizerName: string;
+  organizerEmail: string;
+  contactNumber?: string;
   slug?: string;
-  image?: string;
-  bgColor?: string;
-  theme?: string[];
-  startDate?: Date;
-  status?: string;
-  link?: string;
-  organiser?: string;
-  website?: string;
   imageIndex?: number; // Added to track which image to display
 }
 
-export default function EventsPage() {
+export default function HackathonsPage() {
   const [userAddress, setUserAddress] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", message: "", type: "info" });
@@ -41,52 +39,81 @@ export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const images = [aptos, move, web3, blockchain];
+  const images = [aptos, move, web3, blockchain];;
+
+  // Format date for display
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Determine if a hackathon is upcoming based on registration deadline
+  const isUpcoming = (deadline: string): boolean => {
+    return new Date(deadline) >= new Date();
+  };
 
   // Fetch hackathons from API
   useEffect(() => {
     const fetchHackathons = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/hackathons', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
+        const response = await fetch('/api/hackregister');
         
         if (!response.ok) {
-          throw new Error('Failed to fetch hackathons');
+          throw new Error(`Failed to fetch hackathons: ${response.status} ${response.statusText}`);
         }
         
-        const data = await response.json();
+        const rawData = await response.json();
+        // console.log("Raw API response:", rawData);
         
-        // Process the data to match our component's expected format
-        const processedHackathons = data.hackathons.map((hack: Hackathon, index: number) => ({
-          id: index.toString(),
-          title: hack.title,
-          description: hack.theme?.join(', ') || 'Web3 Hackathon',
-          date: hack.stringDate || new Date().toLocaleDateString(),
-          location: hack.location || 'Virtual',
-          time: hack.mode || 'Online',
-          participants: hack.participants || 0,
-          slug: `hackathon-${index}`,
-          image: `/hackathon-${(index % 5) + 1}.jpg`, // Cycle through 5 placeholder images
-          bgColor: `bg-gradient-to-r from-blue-${((index % 3) + 1) * 300} to-purple-${((index % 3) + 1) * 300}`,
-          link: hack.link,
-          imageIndex: index % images.length // Added to select which image to display
+        // Determine the actual data structure and extract the hackathons array
+        let hackathonData;
+        
+        if (Array.isArray(rawData)) {
+          // If response is already an array, use it directly
+          hackathonData = rawData;
+        } else if (rawData && typeof rawData === 'object') {
+          // Check common API response patterns
+          if (Array.isArray(rawData.data)) {
+            hackathonData = rawData.data;
+          } else if (Array.isArray(rawData.hackathons)) {
+            hackathonData = rawData.hackathons;
+          } else if (Array.isArray(rawData.items)) {
+            hackathonData = rawData.items;
+          } else if (Array.isArray(rawData.results)) {
+            hackathonData = rawData.results;
+          } else {
+            // If we can't find a standard array property, log the structure and throw error
+            console.error("Cannot find hackathons array in response:", rawData);
+            throw new Error('Invalid response format: could not locate hackathons array');
+          }
+        } else {
+          throw new Error('Invalid response format: expected array or object');
+        }
+        
+        // console.log("Extracted hackathon data:", hackathonData);
+        
+        // Process the data to add imageIndex and slug
+        const processedHackathons = hackathonData.map((hack, index) => ({
+          ...hack,
+          id: hack._id ,
+          slug: hack._id ,
+          imageIndex: index % images.length
         }));
+        console.log("Processed hackathons:", processedHackathons);
         
         setHackathons(processedHackathons);
       } catch (err) {
         console.error("Error fetching hackathons:", err);
-        setError("Failed to load hackathons. Please try again later.");
-        showNotification("Error", "Failed to load hackathons. Please try again later.", "error");
+        setError(`Failed to load hackathons: ${err.message}`);
+        showNotification("Error", `Failed to load hackathons: ${err.message}`, "error");
       } finally {
         setIsLoading(false);
       }
     };
-    
     fetchHackathons();
   }, []);
 
@@ -122,7 +149,7 @@ export default function EventsPage() {
       event.preventDefault();
       showNotification(
         "Wallet Connection Required", 
-        "You need to connect your Petra wallet to register for hackathons.", 
+        "You need to connect your wallet to register for hackathons.", 
         "warning"
       );
     }
@@ -134,7 +161,7 @@ export default function EventsPage() {
       if (!window.aptos) {
         showNotification(
           "Wallet Not Found", 
-          "Petra Wallet not detected. Please install the Petra extension.", 
+          "Wallet not detected. Please install the wallet extension.", 
           "error"
         );
         return;
@@ -153,17 +180,29 @@ export default function EventsPage() {
       
       showNotification(
         "Wallet Connected", 
-        "Your Petra wallet has been connected successfully!", 
+        "Your wallet has been connected successfully!", 
         "success"
       );
     } catch (error) {
-      console.error("Failed to connect to Petra Wallet:", error);
+      console.error("Failed to connect to Wallet:", error);
       showNotification(
         "Connection Failed", 
         `Failed to connect: ${(error as Error).message}`, 
         "error"
       );
     }
+  };
+
+  // Get gradient color based on index
+  const getGradient = (index: number): string => {
+    const gradients = [
+      "from-blue-600 to-purple-600",
+      "from-cyan-600 to-blue-600",
+      "from-purple-600 to-pink-600",
+      "from-green-600 to-teal-600",
+      "from-orange-600 to-red-600"
+    ];
+    return gradients[index % gradients.length];
   };
 
   return (
@@ -179,10 +218,10 @@ export default function EventsPage() {
             className="text-center"
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-              Upcoming Hackathons
+              Discover Hackathons
             </h1>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Join the most exciting blockchain hackathons and build the future of Web3 with KOSU.
+              Join the most exciting hackathons and build the future with innovative developers.
             </p>
           </motion.div>
         </div>
@@ -264,38 +303,39 @@ export default function EventsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {hackathons.map((hackathon) => (
+              {hackathons.map((hackathon, index) => (
                 <motion.div
                   key={hackathon.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: Number(hackathon.id) * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden hover:shadow-lg hover:shadow-blue-900/20 transition-all duration-300"
                 >
-                  <div className={`h-48 w-full ${hackathon.bgColor} relative overflow-hidden group`}>
+                  <div className={`h-48 w-full bg-gradient-to-r ${getGradient(index)} relative overflow-hidden group`}>
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
-                    {/* Display single image based on hackathon's imageIndex */}
+                    {/* <Image 
+                      src={hackathon.imageIndex}
+                      alt={hackathon.name}
+                      width={500}
+                      height={500}
+                      /> */}
                     <div className="relative h-full w-full">
-                      <Image 
-                        src={images[hackathon.imageIndex || 0]}
-                        alt={hackathon.title}
-                        fill
-                        style={{ objectFit: "cover" }}
-                        className="group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-5xl font-bold text-white opacity-20">#{index + 1}</div>
+                      </div>
                     </div>
                     <h3 className="absolute bottom-4 left-4 text-white text-2xl font-bold z-10">
-                      {hackathon.title}
+                      {hackathon.name}
                     </h3>
                   </div>
                   <div className="p-6">
-                    <h2 className="text-2xl font-bold mb-2 text-blue-400">{hackathon.title}</h2>
-                    <p className="text-gray-300 mb-4">{hackathon.description}</p>
+                    <h2 className="text-2xl font-bold mb-2 text-blue-400">{hackathon.name}</h2>
+                    <p className="text-gray-300 mb-4 line-clamp-2">{hackathon.description}</p>
                     
                     <div className="grid grid-cols-2 gap-3 mb-6">
                       <div className="flex items-center gap-2 text-gray-400">
                         <Calendar size={16} className="text-blue-400" />
-                        <span>{hackathon.date}</span>
+                        <span>{formatDate(hackathon.startDate)} - {formatDate(hackathon.endDate)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
                         <MapPin size={16} className="text-blue-400" />
@@ -303,26 +343,29 @@ export default function EventsPage() {
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
                         <Clock size={16} className="text-blue-400" />
-                        <span>{hackathon.time}</span>
+                        <span>Register by: {formatDate(hackathon.registrationDeadline)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
                         <Users size={16} className="text-blue-400" />
-                        <span>{hackathon.participants}</span>
+                        <span>Team: {hackathon.minTeamSize}-{hackathon.maxTeamSize} members</span>
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-gray-400 mb-6">
+                      <User size={16} className="text-blue-400" />
+                      <span>Organizer: {hackathon.organizerName}</span>
                     </div>
                     
                     <div className="flex gap-3">
                       <Link 
-                        href={hackathon.link || `/events/${hackathon.slug}`}
-                        target={hackathon.link ? "_blank" : "_self"}
+                        href={`/events/${hackathon.id}`}
                         className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 bg-gray-700 hover:bg-gray-600 text-white flex-1"
                       >
                         View Details
-                        {hackathon.link && <ExternalLink size={16} />}
                       </Link>
                       
                       <Link 
-                        href={userAddress ? `/events/${hackathon.slug}/register` : "#"}
+                        href={userAddress ? `/hackathons/${hackathon.slug}/register` : "#"}
                         onClick={(e) => handleRegistration(e, hackathon.slug || "")}
                         className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 flex-1 ${
                           userAddress 
@@ -330,13 +373,13 @@ export default function EventsPage() {
                             : "bg-gray-700 text-gray-400 cursor-not-allowed"
                         }`}
                       >
-                        {userAddress ? (
+                        {isUpcoming(hackathon.registrationDeadline) ? (
                           <>
-                            Register
-                            <ExternalLink size={16} />
+                            {userAddress ? "Register Now" : "Connect Wallet"}
+                            {userAddress && <ExternalLink size={16} />}
                           </>
                         ) : (
-                          "Connect Wallet"
+                          <span>Registration Closed</span>
                         )}
                       </Link>
                     </div>
@@ -347,19 +390,70 @@ export default function EventsPage() {
           )}
         </div>
       )}
+      
+      {/* Create Hackathon CTA for organizers */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 border border-blue-800/30 p-8 rounded-xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-2">Are you an organizer?</h3>
+              <p className="text-gray-300">Create and manage your own hackathon events on our platform.</p>
+            </div>
+            <Link
+              href="/events/hackregister"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 text-center whitespace-nowrap"
+            >
+              Create a Hackathon
+            </Link>
+          </div>
+        </div>
+      </div>
+      
+      {/* FAQ Section */}
+      <div className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+          Frequently Asked Questions
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gray-800/30 border border-gray-700 p-6 rounded-xl">
+            <h3 className="text-xl font-bold mb-3 text-blue-400">How do I register for a hackathon?</h3>
+            <p className="text-gray-300">Connect your wallet, browse the available hackathons, and click on "Register Now" for the event you're interested in. Fill out the required information and submit your registration.</p>
+          </div>
+          
+          <div className="bg-gray-800/30 border border-gray-700 p-6 rounded-xl">
+            <h3 className="text-xl font-bold mb-3 text-blue-400">Can I participate in multiple hackathons?</h3>
+            <p className="text-gray-300">Yes, you can register and participate in multiple hackathons as long as their schedules don't conflict and you meet their respective requirements.</p>
+          </div>
+          
+          <div className="bg-gray-800/30 border border-gray-700 p-6 rounded-xl">
+            <h3 className="text-xl font-bold mb-3 text-blue-400">How do I form a team?</h3>
+            <p className="text-gray-300">After registering, you can create a team and invite other participants, or join an existing team. Team formation details are available on each hackathon's registration page.</p>
+          </div>
+          
+          <div className="bg-gray-800/30 border border-gray-700 p-6 rounded-xl">
+            <h3 className="text-xl font-bold mb-3 text-blue-400">What if I'm new to hackathons?</h3>
+            <p className="text-gray-300">Many hackathons welcome beginners! Look for events labeled as "beginner-friendly" and check out our resources section for guides on how to prepare.</p>
+          </div>
+        </div>
+      </div>
+      
+ 
+     
     </div>
   );
 }
 
+// TypeScript declaration for wallet
 declare global {
   interface Window {
+    // @ts-ignore
     aptos?: {
       connect: () => Promise<{ address: string }>;
       disconnect: () => Promise<void>;
-      signAndSubmitTransaction: (transaction: any) => Promise<{ hash: string }>;
       isConnected: () => Promise<boolean>;
       account: () => Promise<{ address: string }>;
-      // Add other Petra wallet methods as needed
     };
   }
 }
+
