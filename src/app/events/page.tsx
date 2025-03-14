@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, Clock, Users, ExternalLink, AlertCircle, X, Loader2, User, AtSign } from "lucide-react";
+import FindTeammatesModal from "@/components/FindTeammatesModal";
 
 import aptos from "../../../public/aptos.png";
 
@@ -38,6 +39,8 @@ export default function HackathonsPage() {
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isTeammateModalOpen, setIsTeammateModalOpen] = useState(false);
+  const [selectedHackathon, setSelectedHackathon] = useState<Hackathon | null>(null);
 
   const images = [aptos, move, web3, blockchain];;
 
@@ -155,6 +158,21 @@ export default function HackathonsPage() {
     }
   };
 
+  // Open teammate finder modal
+  const openTeammateModal = (hackathon: Hackathon) => {
+    if (!userAddress) {
+      showNotification(
+        "Wallet Connection Required", 
+        "You need to connect your wallet to find teammates.", 
+        "warning"
+      );
+      return;
+    }
+    
+    setSelectedHackathon(hackathon);
+    setIsTeammateModalOpen(true);
+  };
+
   // Connect wallet function
   const connectWallet = async () => {
     try {
@@ -204,6 +222,11 @@ export default function HackathonsPage() {
     ];
     return gradients[index % gradients.length];
   };
+
+  // Mock user skills for the demo
+  const userSkills = [
+    "JavaScript", "React", "TypeScript", "Node.js", "Blockchain", "Solidity", "Web3"
+  ];
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -364,24 +387,36 @@ export default function HackathonsPage() {
                         View Details
                       </Link>
                       
-                      <Link 
-                        href={userAddress ? `/hackathons/${hackathon.slug}/register` : "#"}
-                        onClick={(e) => handleRegistration(e, hackathon.slug || "")}
-                        className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 flex-1 ${
-                          userAddress 
-                            ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white" 
-                            : "bg-gray-700 text-gray-400 cursor-not-allowed"
-                        }`}
-                      >
-                        {isUpcoming(hackathon.registrationDeadline) ? (
-                          <>
+                      {isUpcoming(hackathon.registrationDeadline) ? (
+                        <div className="flex gap-2 flex-1">
+                          <button
+                            onClick={() => openTeammateModal(hackathon)}
+                            className="flex items-center justify-center gap-1 py-3 px-3 rounded-lg font-medium transition-all duration-300 bg-purple-700 hover:bg-purple-600 text-white"
+                          >
+                            <Users size={16} />
+                          </button>
+                          
+                          <Link 
+                            href={userAddress ? `/hackathons/${hackathon.slug}/register` : "#"}
+                            onClick={(e) => handleRegistration(e, hackathon.slug || "")}
+                            className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 flex-1 ${
+                              userAddress 
+                                ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white" 
+                                : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                            }`}
+                          >
                             {userAddress ? "Register Now" : "Connect Wallet"}
                             {userAddress && <ExternalLink size={16} />}
-                          </>
-                        ) : (
-                          <span>Registration Closed</span>
-                        )}
-                      </Link>
+                          </Link>
+                        </div>
+                      ) : (
+                        <button
+                          disabled
+                          className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium bg-gray-700 text-gray-400 cursor-not-allowed flex-1"
+                        >
+                          Registration Closed
+                        </button>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -438,7 +473,13 @@ export default function HackathonsPage() {
         </div>
       </div>
       
- 
+      {/* Find Teammates Modal */}
+      <FindTeammatesModal
+        isOpen={isTeammateModalOpen}
+        onClose={() => setIsTeammateModalOpen(false)}
+        userSkills={userSkills}
+        userId={userAddress || ''}
+      />
      
     </div>
   );
