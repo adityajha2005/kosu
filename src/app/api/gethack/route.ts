@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     if (id) {
         // @ts-ignore
       const hackathon: IHackathon | null = await Hackathon.findById(id).exec();
+      // console.log("Found hackathon:", hackathon);
       
       if (!hackathon) {
         return NextResponse.json({ success: false, message: 'Hackathon not found' }, { status: 404 });

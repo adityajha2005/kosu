@@ -12,8 +12,11 @@ export interface IHackathon extends Document {
   organizerName: string;
   organizerEmail: string;
   contactNumber: string;
-}
+  inhouse: boolean;
+  outhouse: boolean;
+  registrationlink: string;
 
+}
 const HackathonSchema = new Schema<IHackathon>({
   name: { type: String, required: true },
   description: { type: String, required: true },
@@ -26,8 +29,34 @@ const HackathonSchema = new Schema<IHackathon>({
   organizerName: { type: String, required: true },
   organizerEmail: { type: String, required: true },
   contactNumber: { type: String },
+
+  // Inhouse/Outhouse Logic
+  inhouse: { type: Boolean, default: false },
+  outhouse: { 
+    type: Boolean, 
+    default: false,
+    validate: {
+      validator: function (this: IHackathon) {
+        return !(this.inhouse && this.outhouse); // Ensures both are not true
+      },
+      message: "A hackathon cannot be both inhouse and outhouse.",
+    }
+  },
+
+  // Registration link required if outhouse is true
+  registrationlink: { 
+    type: String, 
+    default: '', 
+    validate: {
+      validator: function (this: IHackathon) {
+        return this.outhouse ? this.registrationlink.trim().length > 0 : true;
+      },
+      message: "Registration link is required for outhouse hackathons.",
+    }
+  },
 });
 
 export default mongoose.models.Hackathon || mongoose.model<IHackathon>("Hackathon", HackathonSchema);
+
 
 

@@ -20,7 +20,14 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
     const body = await req.json();
+    // Ensure all required fields are present
+    if (body.inhouse === undefined) body.inhouse = false;
+    if (body.outhouse === undefined) body.outhouse = false;
+    if (body.registrationlink === undefined) body.registrationlink = '';
+    // console.log(body);
     const hackathon: IHackathon = new Hackathon(body);
+    // console.log("hackathon from backend",hackathon);
+    await hackathon.validate();
     await hackathon.save();
     return NextResponse.json({ success: true, data: hackathon }, { status: 201 });
   } catch (error) {

@@ -16,7 +16,8 @@ import {
   CheckCircle,
   User,
   Clock,
-  Phone
+  Phone,
+  Link
 } from 'lucide-react';
 
 interface FormData {
@@ -31,6 +32,9 @@ interface FormData {
   organizerName: string;
   organizerEmail: string;
   contactNumber: string;
+  inhouse: boolean;
+  outhouse: boolean;
+  registrationlink: string
 }
 
 const RegisterHackathon: React.FC = () => {
@@ -50,7 +54,10 @@ const RegisterHackathon: React.FC = () => {
     maxTeamSize: 4,
     organizerName: '',
     organizerEmail: '',
-    contactNumber: ''
+    contactNumber: '',
+    inhouse: false,
+    outhouse: false,
+    registrationlink: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -59,6 +66,31 @@ const RegisterHackathon: React.FC = () => {
       ...prev,
       [name]: e.target.type === 'number' ? parseInt(value) || 0 : value
     }));
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    
+    // If inhouse is checked, make sure outhouse is unchecked and vice versa
+    if (name === 'inhouse' && checked) {
+      setFormData(prev => ({
+        ...prev,
+        inhouse: true,
+        outhouse: false,
+        registrationlink: '' // Clear registration link when switching to inhouse
+      }));
+    } else if (name === 'outhouse' && checked) {
+      setFormData(prev => ({
+        ...prev,
+        inhouse: false,
+        outhouse: true
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,8 +126,12 @@ const RegisterHackathon: React.FC = () => {
         maxTeamSize: 4,
         organizerName: '',
         organizerEmail: '',
-        contactNumber: ''
+        contactNumber: '',
+        inhouse: false,
+        outhouse: false,
+        registrationlink: ''
       });
+      
       
       // Optional: Redirect after successful submission
      router.push('/events')
@@ -365,7 +401,7 @@ const RegisterHackathon: React.FC = () => {
                 </motion.div>
 
                 <motion.div variants={itemVariants}>
-                  <label htmlFor="organizerName" className="block text-sm font-medium text-gray-300">
+                <label htmlFor="organizerName" className="block text-sm font-medium text-gray-300">
                     Organizer Name
                   </label>
                   <div className="mt-1 relative">
@@ -386,7 +422,8 @@ const RegisterHackathon: React.FC = () => {
                   <label htmlFor="organizerEmail" className="block text-sm font-medium text-gray-300">
                     Organizer Email
                   </label>
-                  <div className="mt-1 relative"><input
+                  <div className="mt-1 relative">
+                    <input
                       type="email"
                       name="organizerEmail"
                       id="organizerEmail"
@@ -417,6 +454,76 @@ const RegisterHackathon: React.FC = () => {
                     <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   </div>
                 </motion.div>
+
+                {/* Registration Type Section */}
+                <motion.div className="sm:col-span-2" variants={itemVariants}>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Registration Type
+                  </label>
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="inhouse"
+                        name="inhouse"
+                        checked={formData.inhouse}
+                        onChange={handleCheckboxChange}
+                        className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-500 rounded"
+                      />
+                      <label htmlFor="inhouse" className="ml-2 block text-sm text-gray-300">
+                        In-house Registration (use our registration system)
+                      </label>
+                      {formData.inhouse && (
+                        <CheckCircle className="ml-2 h-5 w-5 text-cyan-500" />
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="outhouse"
+                        name="outhouse"
+                        checked={formData.outhouse}
+                        onChange={handleCheckboxChange}
+                        className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-500 rounded"
+                      />
+                      <label htmlFor="outhouse" className="ml-2 block text-sm text-gray-300">
+                        External Registration (use your own registration link)
+                      </label>
+                      {formData.outhouse && (
+                        <CheckCircle className="ml-2 h-5 w-5 text-cyan-500" />
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Conditional Registration Link Field */}
+                {formData.outhouse && (
+                  <motion.div 
+                    className="sm:col-span-2"
+                    variants={itemVariants}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <label htmlFor="registrationlink" className="block text-sm font-medium text-gray-300">
+                      External Registration Link
+                    </label>
+                    <div className="mt-1 relative">
+                      <input
+                        type="url"
+                        name="registrationlink"
+                        id="registrationlink"
+                        required={formData.outhouse}
+                        value={formData.registrationlink}
+                        onChange={handleChange}
+                        className="py-3 px-4 pl-10 block w-full shadow-sm focus:ring-cyan-500 focus:border-cyan-500 border-gray-600 rounded-md bg-gray-700 text-gray-100"
+                        placeholder="https://your-registration-page.com"
+                      />
+                      <Link className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
               <motion.div 

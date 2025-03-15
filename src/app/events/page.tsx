@@ -28,6 +28,9 @@ interface Hackathon {
   organizerName: string;
   organizerEmail: string;
   contactNumber?: string;
+  inhouse: boolean;
+  outhouse: boolean;
+  registrationlink?: string;
   slug?: string;
   imageIndex?: number; // Added to track which image to display
 }
