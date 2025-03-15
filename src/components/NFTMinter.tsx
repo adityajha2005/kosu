@@ -273,7 +273,7 @@ export default function NFTMinter({ userAddress, onMintSuccess, onMintError }: N
     try {
       const functions = await getModuleInfo();
       setAvailableFunctions(functions);
-      setErrorMessage("Contract functions checked. See console for details.");
+      setErrorMessage("Contract functions checked. ");
     } catch (error) {
       setErrorMessage(`Error checking contract: ${(error as Error).message}`);
     } finally {

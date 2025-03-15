@@ -28,6 +28,9 @@ interface Hackathon {
   organizerName: string;
   organizerEmail: string;
   contactNumber?: string;
+  inhouse: boolean;
+  outhouse: boolean;
+  registrationlink?: string;
   slug?: string;
   imageIndex?: number; // Added to track which image to display
 }
@@ -106,7 +109,7 @@ export default function HackathonsPage() {
           slug: hack._id ,
           imageIndex: index % images.length
         }));
-        console.log("Processed hackathons:", processedHackathons);
+        // console.log("Processed hackathons:", processedHackathons);
         
         setHackathons(processedHackathons);
       } catch (err) {

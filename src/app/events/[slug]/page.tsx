@@ -112,7 +112,9 @@ export default function EventDetailPage() {
           bgColor: hackathonData.bgColor || "bg-blue-900",
           theme: hackathonData.theme || ["No specific requirements provided"],
      
-        
+          inhouse: hackathonData.inhouse || false,
+          outhouse: hackathonData.outhouse || false,
+          registrationlink: hackathonData.registrationlink || "",
          
           image: hackathonData.image || ""
         };
@@ -213,6 +215,57 @@ export default function EventDetailPage() {
     }
   };
 
+  // Handle registration based on hackathon type
+  const handleRegistration = () => {
+    if (!userAddress) {
+      showNotification(
+        "Wallet Connection Required",
+        "Please connect your wallet to register for this event",
+        "info"
+      );
+      return;
+    }
+    
+    // For external registration
+    if (hackathon.outhouse && hackathon.registrationlink) {
+      // Open the external registration link in a new tab
+      window.open(hackathon.registrationlink, '_blank');
+      return;
+    }
+    
+    // For in-house registration
+    if (hackathon.inhouse) {
+      // Redirect to internal registration page
+      router.push(`/events/${slug}/register`);
+      return;
+    }
+    
+    // Default registration flow (if neither outhouse nor inhouse is specified)
+    try {
+      // Here you would typically make an API call to register the user
+      // For demo purposes, we'll just update local storage
+      const registeredEvents = JSON.parse(localStorage.getItem('registeredEvents') || '[]');
+      if (!registeredEvents.includes(slug)) {
+        registeredEvents.push(slug);
+        localStorage.setItem('registeredEvents', JSON.stringify(registeredEvents));
+      }
+      
+      setIsRegistered(true);
+      showNotification(
+        "Registration Successful",
+        `You've been registered for ${hackathon.title}!`,
+        "success"
+      );
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      showNotification(
+        "Registration Failed",
+        `Failed to register: ${error.message}`,
+        "error"
+      );
+    }
+  };
+
   // Loading state
   if (isLoading) {
     return (
@@ -301,7 +354,7 @@ export default function EventDetailPage() {
                 <div>
                   <h3 className="font-semibold text-white">{toastMessage.title}</h3>
                   <p className="text-sm mt-1 text-gray-200">{toastMessage.message}</p>
-                  {toastMessage.title === "Wallet Connection Required" && (
+                  {toastMessage.title=== "Wallet Connection Required" && (
                     <button
                       onClick={connectWallet}
                       className="mt-3 bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
@@ -409,40 +462,7 @@ export default function EventDetailPage() {
                   </div>
                 ) : (
                   <button
-                    onClick={async () => {
-                      if (!userAddress) {
-                        showNotification(
-                          "Wallet Connection Required",
-                          "Please connect your wallet to register for this event",
-                          "info"
-                        );
-                        return;
-                      }
-                      
-                      try {
-                        // Here you would typically make an API call to register the user
-                        // For demo purposes, we'll just update local storage
-                        const registeredEvents = JSON.parse(localStorage.getItem('registeredEvents') || '[]');
-                        if (!registeredEvents.includes(slug)) {
-                          registeredEvents.push(slug);
-                          localStorage.setItem('registeredEvents', JSON.stringify(registeredEvents));
-                        }
-                        
-                        setIsRegistered(true);
-                        showNotification(
-                          "Registration Successful",
-                          `You've been registered for ${hackathon.title}!`,
-                          "success"
-                        );
-                      } catch (error: any) {
-                        console.error("Registration error:", error);
-                        showNotification(
-                          "Registration Failed",
-                          `Failed to register: ${error.message}`,
-                          "error"
-                        );
-                      }
-                    }}
+                    onClick={handleRegistration}
                     className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                   >
                     Register for Hackathon
