@@ -58,7 +58,15 @@ export default function HackathonsPage() {
 
   // Determine if a hackathon is upcoming based on registration deadline
   const isUpcoming = (deadline: string): boolean => {
-    return new Date(deadline) >= new Date();
+    const deadlineDate = new Date(deadline);
+    const currentDate = new Date();
+    
+    // Set both dates to midnight to compare just the dates without time
+    deadlineDate.setHours(23, 59, 59, 999);
+    currentDate.setHours(0, 0, 0, 0);
+    
+    // Return true if deadline is today or in the future
+    return deadlineDate >= currentDate;
   };
 
   // Fetch hackathons from API
@@ -400,7 +408,7 @@ export default function HackathonsPage() {
                           </button>
                           
                           <Link 
-                            href={userAddress ? `/hackathons/${hackathon.slug}/register` : "#"}
+                            href={userAddress ? `/events/${hackathon.slug}/register` : "#"}
                             onClick={(e) => handleRegistration(e, hackathon.slug || "")}
                             className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all duration-300 flex-1 ${
                               userAddress 
