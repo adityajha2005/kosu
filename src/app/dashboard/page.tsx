@@ -507,8 +507,8 @@ export default function Dashboard() {
                       <div className="text-gray-400 text-sm mt-1">{job.company} • {job.location}</div>
                       <p className="text-gray-300 text-sm mt-2">{job.description}</p>
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {job.skills.map(skill => (
-                          <span key={skill} className="bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
+                        {job.skills?.map((skill, index) => (
+                          <span key={index} className="bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded">
                             {skill}
                           </span>
                         ))}
