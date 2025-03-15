@@ -11,6 +11,9 @@ import RegisteredHackathons from '../../components/RegisteredHackathons';
 import NFTMinter from '../../components/NFTMinter';
 import UserProfileForm from '../../components/UserProfileForm';
 import UserProfileCard from '../../components/UserProfileCard';
+import JobApplicationModal, { JobApplicationData } from '../../components/JobApplicationModal';
+import { Dialog } from '@headlessui/react';
+import { X } from 'lucide-react';
 
 // Let's update the ResumeUploader component to accept an onError prop
 interface ExtendedResumeUploaderProps {
@@ -29,8 +32,19 @@ interface ExtendedAgentInteractionProps {
   onTrainAgent: (agent: Agent, trainingData: string) => Promise<void>;
 }
 
+// Define a type for job applications
+interface JobApplication {
+  id: string;
+  jobId: string;
+  jobTitle: string;
+  company: string;
+  appliedDate: string;
+  status: 'pending' | 'reviewed' | 'interview' | 'rejected' | 'accepted';
+  applicationData: JobApplicationData;
+}
+
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'agents' | 'matches' | 'profile'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'agents' | 'matches' | 'profile' | 'applications'>('dashboard');
   const [address, setAddress] = useState<string | null>(null);
   const [isAssessmentStarted, setIsAssessmentStarted] = useState(false);
   const [assessmentProgress, setAssessmentProgress] = useState(0);
@@ -43,6 +57,12 @@ export default function Dashboard() {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [notificationMessage, setNotificationMessage] = useState<string>('Resume analysis complete! View your job matches.');
   const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<JobMatch | null>(null);
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
+  const [isViewApplicationModalOpen, setIsViewApplicationModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   
   const [jobMatches, setJobMatches] = useState<JobMatch[]>([
     {
@@ -77,7 +97,7 @@ export default function Dashboard() {
   const router = useRouter();
 
   // Remove the URL parameter effect and update tab navigation functions
-  const navigateToTab = (tab: 'dashboard' | 'agents' | 'matches' | 'profile') => {
+  const navigateToTab = (tab: 'dashboard' | 'agents' | 'matches' | 'profile' | 'applications') => {
     setActiveTab(tab);
   };
 
@@ -209,6 +229,119 @@ export default function Dashboard() {
     setActiveTab('profile');
   };
 
+  // Load applications from localStorage on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedApplications = localStorage.getItem('jobApplications');
+      if (savedApplications) {
+        setApplications(JSON.parse(savedApplications));
+      }
+    }
+  }, []);
+  
+  // Check if a job has already been applied to
+  const isJobApplied = (jobId: string): boolean => {
+    return applications.some(app => app.jobId === jobId);
+  };
+  
+  // Function to handle opening the application modal
+  const handleApplyNow = (job: JobMatch) => {
+    // Check if already applied
+    if (isJobApplied(job.id)) {
+      setNotificationMessage('You have already applied for this position.');
+      setShowNotification(true);
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+      return;
+    }
+    
+    setSelectedJob(job);
+    setIsApplicationModalOpen(true);
+  };
+  
+  // Function to handle application submission
+  const handleSubmitApplication = async (applicationData: JobApplicationData) => {
+    try {
+      // Here you would typically send the application data to your backend
+      console.log('Submitting application:', applicationData);
+      
+      // Mock API call - replace with your actual API endpoint
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+      
+      if (selectedJob) {
+        // Create a new application record
+        const newApplication: JobApplication = {
+          id: `app-${Date.now()}`,
+          jobId: selectedJob.id,
+          jobTitle: selectedJob.title,
+          company: selectedJob.company,
+          appliedDate: new Date().toISOString(),
+          status: 'pending',
+          applicationData
+        };
+        
+        // Update state and localStorage
+        const updatedApplications = [...applications, newApplication];
+        setApplications(updatedApplications);
+        localStorage.setItem('jobApplications', JSON.stringify(updatedApplications));
+      }
+      
+      // Show success notification
+      setNotificationMessage('Application submitted successfully!');
+      setShowNotification(true);
+      
+      // Hide notification after 5 seconds
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 5000);
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      setAnalysisError('Failed to submit application. Please try again.');
+      throw error; // Re-throw to be handled by the modal component
+    }
+  };
+
+  // Function to view application details
+  const handleViewApplication = (application: JobApplication) => {
+    setSelectedApplication(application);
+    setIsViewApplicationModalOpen(true);
+  };
+  
+  // Function to open withdraw confirmation modal
+  const handleWithdrawClick = (application: JobApplication, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the view details
+    setSelectedApplication(application);
+    setIsWithdrawModalOpen(true);
+  };
+  
+  // Function to withdraw an application
+  const handleWithdrawApplication = () => {
+    if (!selectedApplication) return;
+    
+    // Filter out the withdrawn application
+    const updatedApplications = applications.filter(
+      app => app.id !== selectedApplication.id
+    );
+    
+    // Update state and localStorage
+    setApplications(updatedApplications);
+    localStorage.setItem('jobApplications', JSON.stringify(updatedApplications));
+    
+    // Show success notification
+    setNotificationMessage('Application withdrawn successfully.');
+    setShowNotification(true);
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 3000);
+    
+    // Close the modal
+    setIsWithdrawModalOpen(false);
+    setSelectedApplication(null);
+  };
+
   if (!address) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
@@ -301,6 +434,17 @@ export default function Dashboard() {
               >
                 Job Matches
               </button>
+              <button 
+                onClick={() => navigateToTab('applications')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'applications' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}
+              >
+                Applications
+                {applications.length > 0 && (
+                  <span className="ml-2 bg-blue-500 text-white text-xs rounded-full px-2 py-0.5">
+                    {applications.length}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -368,6 +512,17 @@ export default function Dashboard() {
                             {skill}
                           </span>
                         ))}
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        <button 
+                          onClick={() => handleApplyNow(job)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm transition-colors"
+                        >
+                          Apply Now
+                        </button>
+                        <button className="bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded text-sm transition-colors">
+                          Save
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -443,6 +598,42 @@ export default function Dashboard() {
               
             </div>
             
+            {/* Add Applications Preview */}
+            {applications.length > 0 && (
+              <div className="lg:col-span-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold text-blue-400">Recent Applications</h2>
+                  <button 
+                    onClick={() => navigateToTab('applications')}
+                    className="text-blue-400 hover:text-blue-300 text-sm"
+                  >
+                    View All
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {applications.slice(0, 2).map(application => (
+                    <div key={application.id} className="bg-gray-700/50 border border-gray-600 rounded-lg p-4">
+                      <div className="flex justify-between">
+                        <h3 className="font-semibold text-white">{application.jobTitle}</h3>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          application.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 
+                          application.status === 'reviewed' ? 'bg-blue-500/20 text-blue-400' :
+                          application.status === 'interview' ? 'bg-purple-500/20 text-purple-400' :
+                          application.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                        </span>
+                      </div>
+                      <div className="text-gray-400 text-sm mt-1">
+                        {application.company} • Applied on {new Date(application.appliedDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -581,9 +772,21 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="flex gap-2 md:flex-col md:w-32">
-                      <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm transition-colors">
-                        Apply Now
-                      </button>
+                      {isJobApplied(job.id) ? (
+                        <button 
+                          className="flex-1 bg-green-600 text-white py-1 px-3 rounded text-sm cursor-default"
+                          disabled
+                        >
+                          Applied
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleApplyNow(job)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm transition-colors"
+                        >
+                          Apply Now
+                        </button>
+                      )}
                       <button className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded text-sm transition-colors">
                         Save
                       </button>
@@ -594,6 +797,92 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+        
+        {/* New Applications Tab */}
+        {activeTab === 'applications' && (
+          <div className="bg-gray-800 rounded-lg p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">Your Applications</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400 text-sm">Filter by:</span>
+                <select className="bg-gray-700 text-white text-sm rounded px-2 py-1 border border-gray-600">
+                  <option value="all">All</option>
+                  <option value="pending">Pending</option>
+                  <option value="reviewed">Reviewed</option>
+                  <option value="interview">Interview</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+            
+            {applications.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-500 mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-300">No applications yet</h3>
+                <p className="text-gray-500 mt-1">Start applying for jobs to track your applications here</p>
+                <button 
+                  onClick={() => navigateToTab('matches')}
+                  className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm transition-colors"
+                >
+                  Browse Job Matches
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {applications.map(application => (
+                  <div 
+                    key={application.id} 
+                    className="border border-gray-700 rounded-lg p-4 hover:bg-gray-700/50 transition-colors"
+                    onClick={() => handleViewApplication(application)}
+                  >
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                      <div>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-medium text-blue-400">{application.jobTitle}</h3>
+                            <p className="text-gray-400 text-sm">{application.company}</p>
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            application.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 
+                            application.status === 'reviewed' ? 'bg-blue-500/20 text-blue-400' :
+                            application.status === 'interview' ? 'bg-purple-500/20 text-purple-400' :
+                            application.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
+                            'bg-red-500/20 text-red-400'
+                          }`}>
+                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                          </span>
+                        </div>
+                        <p className="text-gray-400 text-sm mt-2">
+                          Applied on {new Date(application.appliedDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      
+                      <div className="flex gap-2 md:flex-col md:w-32">
+                        <button 
+                          onClick={() => handleViewApplication(application)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm transition-colors"
+                        >
+                          View Details
+                        </button>
+                        <button 
+                          onClick={(e) => handleWithdrawClick(application, e)}
+                          className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded text-sm transition-colors"
+                        >
+                          Withdraw
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       
       {isCreateModalOpen && (
@@ -602,6 +891,188 @@ export default function Dashboard() {
           onClose={() => setIsCreateModalOpen(false)} 
           onAgentCreated={handleAgentCreated}
         />
+      )}
+      
+      {/* Job Application Modal */}
+      {selectedJob && (
+        <JobApplicationModal 
+          isOpen={isApplicationModalOpen}
+          onClose={() => setIsApplicationModalOpen(false)}
+          job={selectedJob}
+          onSubmit={handleSubmitApplication}
+        />
+      )}
+      
+      {/* Application Details Modal */}
+      {selectedApplication && isViewApplicationModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-white">Application Details</h2>
+                <button 
+                  onClick={() => setIsViewApplicationModalOpen(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <div className="flex justify-between mb-2">
+                  <h3 className="font-medium text-blue-400">{selectedApplication.jobTitle}</h3>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    selectedApplication.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 
+                    selectedApplication.status === 'reviewed' ? 'bg-blue-500/20 text-blue-400' :
+                    selectedApplication.status === 'interview' ? 'bg-purple-500/20 text-purple-400' :
+                    selectedApplication.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
+                    'bg-red-500/20 text-red-400'
+                  }`}>
+                    {selectedApplication.status.charAt(0).toUpperCase() + selectedApplication.status.slice(1)}
+                  </span>
+                </div>
+                <p className="text-gray-400 text-sm">{selectedApplication.company}</p>
+                <p className="text-gray-300 text-sm mt-2">
+                  Applied on {new Date(selectedApplication.appliedDate).toLocaleDateString()} at {new Date(selectedApplication.appliedDate).toLocaleTimeString()}
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="border-t border-gray-700 pt-4">
+                  <h3 className="text-md font-medium text-white mb-3">Application Information</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        GitHub Profile
+                      </label>
+                      <div className="bg-gray-700 border border-gray-600 rounded-md p-2 text-white">
+                        <a 
+                          href={selectedApplication.applicationData.github} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:underline"
+                        >
+                          {selectedApplication.applicationData.github}
+                        </a>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        LinkedIn Profile
+                      </label>
+                      <div className="bg-gray-700 border border-gray-600 rounded-md p-2 text-white">
+                        <a 
+                          href={selectedApplication.applicationData.linkedin} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:underline"
+                        >
+                          {selectedApplication.applicationData.linkedin}
+                        </a>
+                      </div>
+                    </div>
+                    
+                    {selectedApplication.applicationData.coverLetter && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
+                          Cover Letter
+                        </label>
+                        <div className="bg-gray-700 border border-gray-600 rounded-md p-3 text-white">
+                          {selectedApplication.applicationData.coverLetter}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="border-t border-gray-700 pt-4">
+                      <h4 className="text-md font-medium text-white mb-3">Question Responses</h4>
+                      
+                      {Object.entries(selectedApplication.applicationData.answers).map(([questionId, answer]) => (
+                        <div key={questionId} className="mb-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-1">
+                            {questionId === 'experience' ? 'Experience' : 
+                             questionId === 'blockchain' ? 'Blockchain Experience' :
+                             questionId === 'ai' ? 'AI/ML Experience' :
+                             questionId === 'web3' ? 'Web3 Interest' :
+                             questionId === 'technical' ? 'Learning Approach' :
+                             questionId === 'product' ? 'Product Process' :
+                             questionId === 'why' ? 'Interest in Position' : 
+                             questionId}
+                          </label>
+                          <div className="bg-gray-700 border border-gray-600 rounded-md p-3 text-white">
+                            {answer}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-6 border-t border-gray-700 mt-6">
+                <button
+                  onClick={() => setIsViewApplicationModalOpen(false)}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={(e) => {
+                    setIsViewApplicationModalOpen(false);
+                    handleWithdrawClick(selectedApplication, e);
+                  }}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors"
+                >
+                  Withdraw Application
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Withdraw Confirmation Modal */}
+      {selectedApplication && isWithdrawModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl w-full max-w-md">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-white">Withdraw Application</h2>
+                <button 
+                  onClick={() => setIsWithdrawModalOpen(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-300">
+                  Are you sure you want to withdraw your application for <span className="text-blue-400 font-medium">{selectedApplication.jobTitle}</span> at <span className="text-blue-400 font-medium">{selectedApplication.company}</span>?
+                </p>
+                <p className="text-gray-400 text-sm mt-2">
+                  This action cannot be undone. You will need to apply again if you change your mind.
+                </p>
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsWithdrawModalOpen(false)}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleWithdrawApplication}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors"
+                >
+                  Withdraw
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
     </Suspense>
