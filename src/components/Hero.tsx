@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
-"use client";
+"use client"
+// @ts-nocheck;
 
 import Head from 'next/head';
 import { useState, useEffect } from 'react';

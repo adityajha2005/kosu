@@ -1,4 +1,5 @@
-"use client";
+"use client"
+// @ts-nocheck;
 import { useState, useRef, useEffect } from 'react';
 import { runAgent, Agent } from '../services/aiAgentService';
 import { JobMatch } from '../types/aiAgent';

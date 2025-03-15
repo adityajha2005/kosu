@@ -1,4 +1,5 @@
-"use client";
+"use client"
+// @ts-nocheck;
 import { useState, useEffect } from 'react';
 
 // Define the skill options

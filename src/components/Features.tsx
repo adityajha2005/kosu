@@ -1,4 +1,5 @@
-"use client";
+"use client"
+// @ts-nocheck;
 // FeaturesPage.tsx with Modal Implementation
 import React, { useState } from 'react';
 

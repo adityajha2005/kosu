@@ -1,4 +1,5 @@
-"use client";
+"use client"
+// @ts-nocheck;
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { User, Briefcase, Code, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';

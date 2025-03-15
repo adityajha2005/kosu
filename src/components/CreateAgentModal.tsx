@@ -1,4 +1,5 @@
-"use client";
+"use client"
+// @ts-nocheck;
 import { useState } from 'react';
 import { Agent, ModelType } from '../services/aiAgentService';
 

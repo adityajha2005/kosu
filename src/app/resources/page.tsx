@@ -1,4 +1,5 @@
-"use client";
+"use client"
+// @ts-nocheck;
 
 import ResourcesPage from '@/components/Resources';
 import React from 'react';

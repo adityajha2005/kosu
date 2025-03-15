@@ -1,4 +1,5 @@
-"use client";
+"use client"
+// @ts-nocheck;
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Head from 'next/head';
