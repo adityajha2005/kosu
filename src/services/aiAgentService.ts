@@ -717,7 +717,7 @@ const generateResumeSummary = (skills: string[], experience: string[], education
   return `${skillsText} ${experienceText} ${educationText}`.trim();
 };
 
-const generateJobMatches = (skills: string[], modelData: any): JobMatch[] => {
+export const generateJobMatches = (skills: string[], modelData: any): JobMatch[] => {
   // In a production environment, this would use the model output to find matches
   // For now, we'll generate matches based on the extracted skills
   
