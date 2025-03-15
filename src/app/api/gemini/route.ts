@@ -41,7 +41,7 @@ Important Skills: ${jobDetails.importantSkills.join(', ')}
 `;
 
     const promptInstructions = `
-Based on the job details above, generate 10 multiple-choice quiz questions that would test a candidate's knowledge of the critical and important skills required for this position.
+Based on the job details above, generate 5 multiple-choice quiz questions that would test a candidate's knowledge of the critical and important skills required for this position.
 
 Each question should:
 1. Focus primarily on the critical skills (${jobDetails.criticalSkills.join(', ')}) and secondarily on the important skills (${jobDetails.importantSkills.join(', ')})
@@ -70,7 +70,7 @@ Return the response as a JSON object with the following structure:
       throw new Error("Missing Gemini API key");
     }
 
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
