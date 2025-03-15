@@ -65,7 +65,7 @@ Return the response as a JSON object with the following structure:
     const fullPrompt = jobPrompt + promptInstructions;
 
     // Call Google's Gemini API
-    const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
+    const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyA3moSS4_ALdgy63FNp0pE0lLXgyUU2Kk8'
     if (!GEMINI_API_KEY) {
       throw new Error("Missing Gemini API key");
     }
