@@ -875,6 +875,13 @@ export default function Dashboard() {
                         >
                           Withdraw
                         </button>
+                        <button 
+                          onClick={() => router.push(`/dashboard/${application.jobId}`)}
+                          className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded text-sm transition-colors"
+                        >
+                          Take Interview
+                        </button>
+
                       </div>
                     </div>
                   </div>
