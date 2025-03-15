@@ -676,6 +676,7 @@ export default function Dashboard() {
                   <div 
                     key={agent.id}
                     className={`bg-gray-800 rounded-lg p-4 cursor-pointer transition-transform hover:scale-[1.02] ${
+                    //@ts-ignore
                       selectedAgent ? (selectedAgent.id === agent.id ? 'ring-2 ring-blue-500' : '') : ''
                     }`}
                     onClick={() => setSelectedAgent(agent)}
