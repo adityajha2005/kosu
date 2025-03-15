@@ -109,7 +109,7 @@ export default function HackathonsPage() {
           slug: hack._id ,
           imageIndex: index % images.length
         }));
-        console.log("Processed hackathons:", processedHackathons);
+        // console.log("Processed hackathons:", processedHackathons);
         
         setHackathons(processedHackathons);
       } catch (err) {
